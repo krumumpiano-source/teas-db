@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ดาวน์โหลดเอกสาร - TEAS-DB (Teacher Evidence & Achievement System)</title>
   <script>
-    window.API_BASE_URL = 'https://script.google.com/macros/s/AKfycbyPG_sgIAzE_KHrn50qsYFu0tHGRXPSJuquHSb7fpUFqPHpdIWjXYMb8NqdMhaDU7W1/exec';
+    window.API_BASE_URL = 'https://script.google.com/macros/s/AKfycbwfKynl5gMWD1CCecER2er5EZGOnRTkhjHuiBb5yFTAyUtC2mKUepb1c93HcwLZqfcx/exec';
     window.currentPage = 'download';
   </script>
   <style>
@@ -191,22 +191,42 @@
     
     async function loadEvidenceTypes() {
       try {
-        var result = await apiCall('getEvidenceTypes', {});
         var types = [];
+        var useApiData = false;
         
-        // Handle different response formats
-        if (Array.isArray(result)) {
-          // Backend returns array directly (legacy support)
-          types = result;
-        } else if (result && Array.isArray(result.types)) {
-          // Backend returns {success: true, types: [...]}
-          types = result.types;
-        } else if (result && result.success && Array.isArray(result.data)) {
-          // Alternative format {success: true, data: [...]}
-          types = result.data;
+        try {
+          var result = await apiCall('getEvidenceTypes', {});
+          
+          // Handle different response formats
+          if (Array.isArray(result)) {
+            types = result;
+            useApiData = true;
+          } else if (result && Array.isArray(result.types) && result.types.length > 0) {
+            types = result.types;
+            useApiData = true;
+          } else if (result && result.success && Array.isArray(result.data) && result.data.length > 0) {
+            types = result.data;
+            useApiData = true;
+          }
+        } catch(apiError) {
+          console.warn('API call failed, using hardcoded types:', apiError);
+        }
+        
+        // Fallback to hardcoded types matching the sheet structure
+        if (!useApiData || types.length === 0) {
+          types = [
+            { value: 'lesson_plan', label: 'แผนการสอน' },
+            { value: 'activity', label: 'กิจกรรม' },
+            { value: 'student_work', label: 'ผลงานนักเรียน' },
+            { value: 'official_doc', label: 'หนังสือราชการ' },
+            { value: 'award', label: 'รางวัล / เกียรติบัตร' },
+            { value: 'other', label: 'อื่น ๆ' }
+          ];
         }
         
         var select = document.getElementById('filterType');
+        if (!select) return;
+        
         // Clear existing options except the placeholder
         while (select.options.length > 1) {
           select.remove(1);
@@ -219,11 +239,27 @@
             option.textContent = type.label || type.name || type.text;
             select.appendChild(option);
           });
-        } else {
-          console.warn('No evidence types found. Please check LOOKUP_EVIDENCE_TYPE sheet.');
         }
       } catch(error) {
         console.error('Error loading evidence types:', error);
+        // Fallback to hardcoded types on error
+        var select = document.getElementById('filterType');
+        if (select && select.options.length === 1) {
+          var hardcodedTypes = [
+            { value: 'lesson_plan', label: 'แผนการสอน' },
+            { value: 'activity', label: 'กิจกรรม' },
+            { value: 'student_work', label: 'ผลงานนักเรียน' },
+            { value: 'official_doc', label: 'หนังสือราชการ' },
+            { value: 'award', label: 'รางวัล / เกียรติบัตร' },
+            { value: 'other', label: 'อื่น ๆ' }
+          ];
+          hardcodedTypes.forEach(function(type) {
+            var option = document.createElement('option');
+            option.value = type.value;
+            option.textContent = type.label;
+            select.appendChild(option);
+          });
+        }
       }
     }
     
