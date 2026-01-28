@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ค้นหาหลักฐาน - TEAS-DB</title>
+  <title>ค้นหาหลักฐาน - TEAS-DB (Teacher Evidence & Achievement System)</title>
   <script>
     window.API_BASE_URL = 'https://script.google.com/macros/s/AKfycbyPG_sgIAzE_KHrn50qsYFu0tHGRXPSJuquHSb7fpUFqPHpdIWjXYMb8NqdMhaDU7W1/exec';
     window.currentPage = 'search';
@@ -174,14 +174,37 @@
     
     async function loadEvidenceTypes() {
       try {
-        var types = await apiCall('getEvidenceTypes', {});
+        var result = await apiCall('getEvidenceTypes', {});
+        var types = [];
+        
+        // Handle different response formats
+        if (Array.isArray(result)) {
+          // Backend returns array directly (legacy support)
+          types = result;
+        } else if (result && Array.isArray(result.types)) {
+          // Backend returns {success: true, types: [...]}
+          types = result.types;
+        } else if (result && result.success && Array.isArray(result.data)) {
+          // Alternative format {success: true, data: [...]}
+          types = result.data;
+        }
+        
         var select = document.getElementById('searchType');
-        types.forEach(function(type) {
-          var option = document.createElement('option');
-          option.value = type.value;
-          option.textContent = type.label;
-          select.appendChild(option);
-        });
+        // Clear existing options except the placeholder
+        while (select.options.length > 1) {
+          select.remove(1);
+        }
+        
+        if (types && types.length > 0) {
+          types.forEach(function(type) {
+            var option = document.createElement('option');
+            option.value = type.value || type.code || type.id;
+            option.textContent = type.label || type.name || type.text;
+            select.appendChild(option);
+          });
+        } else {
+          console.warn('No evidence types found. Please check LOOKUP_EVIDENCE_TYPE sheet.');
+        }
       } catch(error) {
         console.error('Error loading evidence types:', error);
       }
