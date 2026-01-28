@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>อัปโหลดหลักฐาน - TEAS-DB</title>
+  <title>อัปโหลดหลักฐาน - TEAS-DB (Teacher Evidence & Achievement System)</title>
   <script>
     window.API_BASE_URL = 'https://script.google.com/macros/s/AKfycbyPG_sgIAzE_KHrn50qsYFu0tHGRXPSJuquHSb7fpUFqPHpdIWjXYMb8NqdMhaDU7W1/exec';
     window.currentPage = 'upload';
@@ -20,7 +20,7 @@
       padding: 20px;
     }
     .container {
-      max-width: 800px;
+      max-width: 900px;
       margin: 0 auto;
       background: white;
       border-radius: 20px;
@@ -34,23 +34,58 @@
       text-align: center;
     }
     .content { padding: 40px; }
-    .form-group { margin-bottom: 25px; }
+    
+    /* SECTION 0: Context Bar */
+    .context-bar {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 15px 20px;
+      margin-bottom: 30px;
+      border-radius: 8px;
+      font-size: 0.95em;
+      color: #856404;
+    }
+    .context-bar strong {
+      color: #856404;
+    }
+    
+    /* Section Styling */
+    .section {
+      margin-bottom: 35px;
+    }
+    .section-title {
+      font-size: 1.4em;
+      color: #667eea;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 3px solid #e9ecef;
+      font-weight: 700;
+    }
+    .section-subtitle {
+      font-size: 1.1em;
+      color: #495057;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+    
+    .form-group { margin-bottom: 20px; }
     .form-group label {
       display: block;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       color: #333;
       font-weight: 600;
-      font-size: 1.1em;
+      font-size: 1em;
     }
     .form-group input,
     .form-group select,
     .form-group textarea {
       width: 100%;
-      padding: 14px 16px;
+      padding: 12px 16px;
       border: 2px solid #e9ecef;
       border-radius: 10px;
       font-size: 1em;
       font-family: inherit;
+      transition: border-color 0.3s;
     }
     .form-group input:focus,
     .form-group select:focus,
@@ -59,26 +94,78 @@
       border-color: #667eea;
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
+    .form-group .help-text {
+      font-size: 0.85em;
+      color: #6c757d;
+      margin-top: 5px;
+      font-style: italic;
+    }
+    
+    /* Checkbox Group */
     .checkbox-group {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
       margin-top: 10px;
     }
     .checkbox-item {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      padding: 12px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      transition: background 0.2s;
     }
+    .checkbox-item:hover {
+      background: #e9ecef;
+    }
+    .checkbox-item input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+    .checkbox-item label {
+      margin: 0;
+      font-weight: normal;
+      cursor: pointer;
+      flex: 1;
+    }
+    
+    /* File Upload */
     .file-upload {
       border: 2px dashed #667eea;
-      border-radius: 8px;
-      padding: 30px;
+      border-radius: 10px;
+      padding: 25px;
       text-align: center;
       background: #f8f9ff;
       cursor: pointer;
+      transition: all 0.3s;
+    }
+    .file-upload:hover {
+      background: #f0f2ff;
+      border-color: #5568d3;
     }
     .file-upload input[type="file"] { display: none; }
+    .file-upload-label {
+      font-weight: 600;
+      color: #667eea;
+      margin-bottom: 8px;
+      display: block;
+    }
+    .file-upload-hint {
+      font-size: 0.9em;
+      color: #6c757d;
+      margin-top: 5px;
+    }
+    .file-name-display {
+      margin-top: 10px;
+      padding: 10px;
+      background: white;
+      border-radius: 5px;
+      color: #495057;
+      font-weight: 500;
+    }
     .file-list {
       margin-top: 10px;
       text-align: left;
@@ -89,9 +176,9 @@
       overflow-y: auto;
     }
     .file-item {
-      padding: 5px 10px;
+      padding: 8px 12px;
       margin: 5px 0;
-      background: #f8f9ff;
+      background: #f8f9fa;
       border-radius: 5px;
       display: flex;
       justify-content: space-between;
@@ -102,25 +189,78 @@
       cursor: pointer;
       font-weight: bold;
       padding: 0 10px;
+      font-size: 1.2em;
     }
-    .section-title {
-      font-size: 1.3em;
+    .file-item-remove:hover {
+      color: #c82333;
+    }
+    
+    /* Summary Box */
+    .summary-box {
+      background: #e7f3ff;
+      border: 2px solid #667eea;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 30px 0;
+    }
+    .summary-box-title {
+      font-size: 1.2em;
+      font-weight: 700;
       color: #667eea;
-      margin: 30px 0 15px 0;
-      padding-bottom: 10px;
-      border-bottom: 2px solid #e9ecef;
+      margin-bottom: 15px;
     }
+    .summary-item {
+      margin: 8px 0;
+      padding: 8px 0;
+      border-bottom: 1px solid #cfe2ff;
+    }
+    .summary-item:last-child {
+      border-bottom: none;
+    }
+    .summary-label {
+      font-weight: 600;
+      color: #495057;
+      display: inline-block;
+      min-width: 150px;
+    }
+    .summary-value {
+      color: #212529;
+    }
+    .summary-awards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 5px;
+    }
+    .summary-award-badge {
+      background: #667eea;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 15px;
+      font-size: 0.9em;
+      font-weight: 500;
+    }
+    
     .btn {
       padding: 16px 32px;
       border: none;
       border-radius: 12px;
-      font-size: 1.1em;
+      font-size: 1.2em;
       font-weight: 600;
       cursor: pointer;
       width: 100%;
       margin-top: 20px;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
     .message {
       padding: 15px;
@@ -130,6 +270,8 @@
     }
     .message.success { background: #d4edda; color: #155724; }
     .message.error { background: #f8d7da; color: #721c24; }
+    
+    .required { color: #dc3545; }
   </style>
 </head>
 <body>
@@ -143,102 +285,154 @@
       <div id="loading" style="display: none;">กำลังบันทึก...</div>
       
       <form id="uploadForm">
-        <div class="form-group">
-          <label>📋 ชื่อหลักฐาน *</label>
-          <input type="text" id="title" name="title" required placeholder="เช่น แผนการจัดการเรียนรู้ หน่วยที่ 1">
+        <!-- SECTION 0: Context Bar -->
+        <div class="context-bar">
+          <strong>💡 ข้อมูลสำคัญ:</strong> หลักฐาน 1 ชิ้น สามารถใช้ได้หลายรางวัล ระบบจะช่วยคำนวณให้
         </div>
-        <div class="form-group">
-          <label>📅 วันที่ *</label>
-          <input type="date" id="date" name="date" required>
-        </div>
-        <div class="form-group">
-          <label>📁 ประเภทหลักฐาน *</label>
-          <select id="evidence_type" name="evidence_type" required>
-            <option value="">-- เลือกประเภท --</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>📄 ประเภทไฟล์</label>
-          <select id="file_type" name="file_type">
-            <option value="pdf">PDF</option>
-            <option value="image">รูปภาพ</option>
-            <option value="document">เอกสาร Word</option>
-            <option value="spreadsheet">สเปรดชีต</option>
-            <option value="other">อื่นๆ</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>📝 คำอธิบาย</label>
-          <textarea id="description" name="description" placeholder="อธิบายรายละเอียดของหลักฐานนี้" style="width: 100%; padding: 14px 16px; border: 2px solid #e9ecef; border-radius: 10px; font-size: 1em; font-family: inherit; min-height: 100px; resize: vertical;"></textarea>
-        </div>
-        <div class="form-group">
-          <label>📎 แนบไฟล์หลัก *</label>
-          <div class="file-upload" onclick="document.getElementById('fileInput').click()">
-            <div>📎 คลิกเพื่อเลือกไฟล์หลัก (เช่น คำสั่ง, เกียรติบัตร)</div>
-            <div id="fileName">ยังไม่ได้เลือกไฟล์</div>
-            <input type="file" id="fileInput" name="file">
+        
+        <!-- SECTION 1: เป้าหมายของหลักฐาน -->
+        <div class="section">
+          <h2 class="section-title">🎯 เป้าหมายของหลักฐาน</h2>
+          <p class="section-subtitle">ใช้หลักฐานนี้กับรางวัล / การประเมินใดบ้าง <span class="required">*</span></p>
+          <div class="checkbox-group">
+            <div class="checkbox-item">
+              <input type="checkbox" id="sar" name="sar" value="true">
+              <label for="sar">📘 SAR</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="pa_ks4" name="pa_ks4" value="true">
+              <label for="pa_ks4">🎓 วิทยฐานะ คศ.4</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="phet_mathayom" name="phet_mathayom" value="true">
+              <label for="phet_mathayom">💎 เพชรมัธยมพะเยา</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="khurusapha" name="khurusapha" value="true">
+              <label for="khurusapha">🏛 รางวัลคุรุสภา</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="obec" name="obec" value="true">
+              <label for="obec">🏆 OBEC Awards</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="next_gen" name="next_gen" value="true">
+              <label for="next_gen">🌱 Next Gen Teacher</label>
+            </div>
           </div>
-        </div>
-        <div class="form-group">
-          <label>📎 แนบไฟล์เพิ่มเติม (รูปภาพ, เอกสารประกอบ)</label>
-          <div class="file-upload" onclick="document.getElementById('additionalFilesInput').click()">
-            <div>📎 คลิกเพื่อเลือกไฟล์เพิ่มเติม (กด Ctrl หรือ Cmd เพื่อเลือกหลายไฟล์)</div>
-            <div class="file-list" id="fileList">ยังไม่ได้เลือกไฟล์</div>
-            <input type="file" id="additionalFilesInput" name="additionalFiles" multiple>
-          </div>
-        </div>
-        <h3 class="section-title" style="font-size: 1.3em; color: #667eea; margin: 30px 0 15px 0; padding-bottom: 10px; border-bottom: 2px solid #e9ecef;">🎯 ใช้สำหรับรางวัล/การประเมิน</h3>
-        <div class="checkbox-group">
-          <div class="checkbox-item">
-            <input type="checkbox" id="sar" name="sar" value="true">
-            <label for="sar" style="margin: 0; font-weight: normal;">📘 SAR</label>
-          </div>
-          <div class="checkbox-item">
-            <input type="checkbox" id="pa_ks4" name="pa_ks4" value="true">
-            <label for="pa_ks4" style="margin: 0; font-weight: normal;">🎓 วิทยฐานะ คศ.4</label>
-          </div>
-          <div class="checkbox-item">
-            <input type="checkbox" id="phet_mathayom" name="phet_mathayom" value="true">
-            <label for="phet_mathayom" style="margin: 0; font-weight: normal;">💎 เพชรมัธยมพะเยา</label>
-          </div>
-          <div class="checkbox-item">
-            <input type="checkbox" id="khurusapha" name="khurusapha" value="true">
-            <label for="khurusapha" style="margin: 0; font-weight: normal;">🏛 รางวัลคุรุสภา</label>
-          </div>
-          <div class="checkbox-item">
-            <input type="checkbox" id="obec" name="obec" value="true">
-            <label for="obec" style="margin: 0; font-weight: normal;">🏆 OBEC Awards</label>
-          </div>
-          <div class="checkbox-item">
-            <input type="checkbox" id="next_gen" name="next_gen" value="true">
-            <label for="next_gen" style="margin: 0; font-weight: normal;">🌱 Next Gen Teacher</label>
+          
+          <!-- เพชรมัธยมพะเยา (เฉพาะ) -->
+          <div style="margin-top: 25px;">
+            <p class="section-subtitle">💎 เพชรมัธยมพะเยา (เฉพาะ)</p>
+            <div class="checkbox-group">
+              <div class="checkbox-item">
+                <input type="checkbox" id="krong_ton" name="krong_ton" value="true">
+                <label for="krong_ton">ครองตน</label>
+              </div>
+              <div class="checkbox-item">
+                <input type="checkbox" id="krong_kon" name="krong_kon" value="true">
+                <label for="krong_kon">ครองคน</label>
+              </div>
+              <div class="checkbox-item">
+                <input type="checkbox" id="krong_ngan" name="krong_ngan" value="true">
+                <label for="krong_ngan">ครองงาน</label>
+              </div>
+            </div>
           </div>
         </div>
-        <h3 class="section-title" style="font-size: 1.3em; color: #667eea; margin: 30px 0 15px 0; padding-bottom: 10px; border-bottom: 2px solid #e9ecef;">💎 เพชรมัธยมพะเยา (เฉพาะ)</h3>
-        <div class="checkbox-group">
-          <div class="checkbox-item">
-            <input type="checkbox" id="krong_ton" name="krong_ton" value="true">
-            <label for="krong_ton" style="margin: 0; font-weight: normal;">ครองตน</label>
+        
+        <!-- SECTION 2: ลักษณะของหลักฐาน -->
+        <div class="section">
+          <h2 class="section-title">📋 ลักษณะของหลักฐาน</h2>
+          
+          <div class="form-group">
+            <label>1️⃣ ประเภทหลักฐาน <span class="required">*</span></label>
+            <select id="evidence_type" name="evidence_type" required>
+              <option value="">-- เลือกประเภท --</option>
+            </select>
+            <div class="help-text">ตัวเลือกนี้จะช่วยให้ระบบจัดเก็บและค้นหาหลักฐานได้ถูกต้อง</div>
           </div>
-          <div class="checkbox-item">
-            <input type="checkbox" id="krong_kon" name="krong_kon" value="true">
-            <label for="krong_kon" style="margin: 0; font-weight: normal;">ครองคน</label>
-          </div>
-          <div class="checkbox-item">
-            <input type="checkbox" id="krong_ngan" name="krong_ngan" value="true">
-            <label for="krong_ngan" style="margin: 0; font-weight: normal;">ครองงาน</label>
+          
+          <div class="form-group">
+            <label>2️⃣ ระดับผลกระทบ</label>
+            <select id="impact_level" name="impact_level">
+              <option value="">-- เลือกระดับ --</option>
+              <option value="classroom">ห้องเรียน</option>
+              <option value="school">โรงเรียน</option>
+              <option value="district">เขต / จังหวัด</option>
+              <option value="national">ระดับประเทศ</option>
+            </select>
+            <div class="help-text">สำคัญมากสำหรับ "เพชรมัธยมพะเยา" และ "OBEC Awards"</div>
           </div>
         </div>
-        <div class="form-group">
-          <label>📊 ระดับผลกระทบ</label>
-          <select id="impact_level" name="impact_level">
-            <option value="school">โรงเรียน</option>
-            <option value="district">เขตพื้นที่</option>
-            <option value="province">จังหวัด</option>
-            <option value="national">ระดับชาติ</option>
-            <option value="international">ระดับนานาชาติ</option>
-          </select>
+        
+        <!-- SECTION 3: ระบุตัวตนของหลักฐาน -->
+        <div class="section">
+          <h2 class="section-title">📝 ระบุตัวตนของหลักฐาน</h2>
+          
+          <div class="form-group">
+            <label>ชื่อหลักฐาน <span class="required">*</span></label>
+            <input type="text" id="title" name="title" required placeholder="เช่น แผนการจัดการเรียนรู้ หน่วยที่ 1">
+          </div>
+          
+          <div class="form-group">
+            <label>วันที่เกิดกิจกรรม / วันที่ของหลักฐาน <span class="required">*</span></label>
+            <input type="date" id="date" name="date" required>
+          </div>
+          
+          <div class="form-group">
+            <label>ปีการศึกษา</label>
+            <input type="text" id="academic_year" name="academic_year" readonly style="background: #e9ecef;">
+            <div class="help-text">จะคำนวณอัตโนมัติจากวันที่ (สามารถแก้ไขได้)</div>
+          </div>
         </div>
+        
+        <!-- SECTION 4: คำอธิบายหลักฐาน -->
+        <div class="section">
+          <h2 class="section-title">📄 คำอธิบายหลักฐาน</h2>
+          <p class="section-subtitle">อธิบายให้ระบบเข้าใจ (ใช้สำหรับ SAR อัตโนมัติ)</p>
+          
+          <div class="form-group">
+            <label>คำอธิบายหลักฐาน</label>
+            <textarea id="description" name="description" rows="5" placeholder="แนะนำให้เขียน:&#10;- ใคร ทำอะไร&#10;- เพื่ออะไร&#10;- เชื่อมกับตัวชี้วัดใด"></textarea>
+            <div class="help-text">ช่องนี้ไม่ใช่ช่องเล่าเรื่อง แต่คือ input สำหรับ SAR</div>
+          </div>
+        </div>
+        
+        <!-- SECTION 5: แนบไฟล์ -->
+        <div class="section">
+          <h2 class="section-title">📎 แนบไฟล์</h2>
+          
+          <div class="form-group">
+            <label class="file-upload-label">ไฟล์หลัก <span class="required">*</span></label>
+            <div class="file-upload" onclick="document.getElementById('fileInput').click()">
+              <div class="file-upload-label">📎 คลิกเพื่อเลือกไฟล์หลัก</div>
+              <div class="file-upload-hint">1 ไฟล์ (แนะนำ: PDF / DOC / ฯลฯ)</div>
+              <div class="file-name-display" id="fileName">ยังไม่ได้เลือกไฟล์</div>
+              <input type="file" id="fileInput" name="file">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="file-upload-label">ไฟล์เพิ่มเติม (ไม่บังคับ)</label>
+            <div class="file-upload" onclick="document.getElementById('additionalFilesInput').click()">
+              <div class="file-upload-label">📎 คลิกเพื่อเลือกไฟล์เพิ่มเติม</div>
+              <div class="file-upload-hint">รูปภาพ, เอกสารเสริม (เลือกหลายไฟล์ได้)</div>
+              <div class="file-list" id="fileList">ยังไม่ได้เลือกไฟล์</div>
+              <input type="file" id="additionalFilesInput" name="additionalFiles" multiple>
+            </div>
+          </div>
+        </div>
+        
+        <!-- SECTION 6: ตรวจสอบก่อนบันทึก -->
+        <div class="section">
+          <div class="summary-box" id="summaryBox" style="display: none;">
+            <div class="summary-box-title">✅ ตรวจสอบก่อนบันทึก</div>
+            <div id="summaryContent"></div>
+          </div>
+        </div>
+        
+        <!-- SECTION 7: ปุ่มบันทึก -->
         <button type="submit" class="btn" id="submitBtn">💾 บันทึกหลักฐาน</button>
       </form>
     </div>
@@ -281,22 +475,130 @@
     
     var additionalFiles = [];
     
+    // Calculate academic year from date
+    function calculateAcademicYear(dateStr) {
+      if (!dateStr) return '';
+      var date = new Date(dateStr);
+      var month = date.getMonth() + 1;
+      var year = date.getFullYear();
+      var beYear = year + 543;
+      
+      if (month >= 5) {
+        return beYear.toString();
+      } else {
+        return (beYear - 1).toString();
+      }
+    }
+    
+    // Update summary box
+    function updateSummary() {
+      var summaryBox = document.getElementById('summaryBox');
+      var summaryContent = document.getElementById('summaryContent');
+      
+      var selectedAwards = [];
+      if (document.getElementById('sar').checked) selectedAwards.push('SAR');
+      if (document.getElementById('pa_ks4').checked) selectedAwards.push('วิทยฐานะ คศ.4');
+      if (document.getElementById('phet_mathayom').checked) selectedAwards.push('เพชรมัธยมพะเยา');
+      if (document.getElementById('khurusapha').checked) selectedAwards.push('คุรุสภา');
+      if (document.getElementById('obec').checked) selectedAwards.push('OBEC Awards');
+      if (document.getElementById('next_gen').checked) selectedAwards.push('Next Gen Teacher');
+      
+      var evidenceType = document.getElementById('evidence_type');
+      var evidenceTypeText = evidenceType.options[evidenceType.selectedIndex]?.text || 'ยังไม่ได้เลือก';
+      
+      var date = document.getElementById('date').value;
+      var academicYear = calculateAcademicYear(date) || 'ยังไม่ได้ระบุ';
+      
+      if (selectedAwards.length > 0 || evidenceType.value || date) {
+        var html = '';
+        
+        if (selectedAwards.length > 0) {
+          html += '<div class="summary-item">';
+          html += '<span class="summary-label">จะถูกนับใน:</span>';
+          html += '<div class="summary-awards">';
+          selectedAwards.forEach(function(award) {
+            html += '<span class="summary-award-badge">' + award + '</span>';
+          });
+          html += '</div></div>';
+        }
+        
+        html += '<div class="summary-item">';
+        html += '<span class="summary-label">ประเภท:</span>';
+        html += '<span class="summary-value">' + evidenceTypeText + '</span>';
+        html += '</div>';
+        
+        html += '<div class="summary-item">';
+        html += '<span class="summary-label">ปีการศึกษา:</span>';
+        html += '<span class="summary-value">' + academicYear + '</span>';
+        html += '</div>';
+        
+        summaryContent.innerHTML = html;
+        summaryBox.style.display = 'block';
+      } else {
+        summaryBox.style.display = 'none';
+      }
+    }
+    
+    // Add event listeners for summary updates
+    function setupSummaryListeners() {
+      var checkboxes = ['sar', 'pa_ks4', 'phet_mathayom', 'khurusapha', 'obec', 'next_gen'];
+      checkboxes.forEach(function(id) {
+        document.getElementById(id).addEventListener('change', updateSummary);
+      });
+      
+      document.getElementById('evidence_type').addEventListener('change', updateSummary);
+      document.getElementById('date').addEventListener('change', function() {
+        var academicYearInput = document.getElementById('academic_year');
+        academicYearInput.value = calculateAcademicYear(this.value);
+        updateSummary();
+      });
+    }
+    
     async function loadEvidenceTypes(editId) {
       try {
-        var types = await apiCall('getEvidenceTypes', {});
+        var result = await apiCall('getEvidenceTypes', {});
+        var types = [];
+        
+        // Handle different response formats
+        if (Array.isArray(result)) {
+          types = result;
+        } else if (result && Array.isArray(result.types)) {
+          types = result.types;
+        } else if (result && result.success && Array.isArray(result.data)) {
+          types = result.data;
+        }
+        
         var select = document.getElementById('evidence_type');
-        types.forEach(function(type) {
-          var option = document.createElement('option');
-          option.value = type.value;
-          option.textContent = type.label;
-          select.appendChild(option);
-        });
+        // Clear existing options except the placeholder
+        while (select.options.length > 1) {
+          select.remove(1);
+        }
+        
+        if (types && types.length > 0) {
+          types.forEach(function(type) {
+            var option = document.createElement('option');
+            option.value = type.value || type.code || type.id;
+            option.textContent = type.label || type.name || type.text;
+            select.appendChild(option);
+          });
+        } else {
+          console.warn('No evidence types found. Please check LOOKUP_EVIDENCE_TYPE sheet.');
+          var messageDiv = document.getElementById('message');
+          if (messageDiv) {
+            messageDiv.textContent = '⚠️ ไม่พบประเภทหลักฐาน กรุณาตรวจสอบ LOOKUP_EVIDENCE_TYPE sheet';
+            messageDiv.className = 'message error';
+            messageDiv.style.display = 'block';
+          }
+        }
         
         if (editId) {
           loadEvidenceData(editId);
         }
+        
+        setupSummaryListeners();
       } catch(error) {
         console.error('Error loading types:', error);
+        showMessage('ไม่สามารถโหลดประเภทหลักฐานได้: ' + handleError(error), 'error');
       }
     }
     
@@ -309,8 +611,10 @@
           document.getElementById('title').value = ev.title || '';
           document.getElementById('date').value = ev.date || '';
           document.getElementById('evidence_type').value = ev.evidence_type || '';
-          document.getElementById('file_type').value = ev.file_type || '';
+          document.getElementById('impact_level').value = ev.impact_level || '';
           document.getElementById('description').value = ev.description || '';
+          document.getElementById('academic_year').value = ev.academic_year || calculateAcademicYear(ev.date || '');
+          
           document.getElementById('sar').checked = ev.sar === true || ev.sar === 'TRUE';
           document.getElementById('pa_ks4').checked = ev.pa_ks4 === true || ev.pa_ks4 === 'TRUE';
           document.getElementById('phet_mathayom').checked = ev.phet_mathayom === true || ev.phet_mathayom === 'TRUE';
@@ -320,9 +624,11 @@
           document.getElementById('krong_ton').checked = ev.krong_ton === true || ev.krong_ton === 'TRUE';
           document.getElementById('krong_kon').checked = ev.krong_kon === true || ev.krong_kon === 'TRUE';
           document.getElementById('krong_ngan').checked = ev.krong_ngan === true || ev.krong_ngan === 'TRUE';
-          document.getElementById('impact_level').value = ev.impact_level || '';
+          
           document.getElementById('submitBtn').textContent = '💾 อัปเดตหลักฐาน';
           document.querySelector('.header h1').textContent = '✏️ แก้ไขหลักฐาน';
+          
+          updateSummary();
         }
       } catch(error) {
         console.error('Error loading evidence:', error);
@@ -332,7 +638,7 @@
     document.getElementById('fileInput').addEventListener('change', function(e) {
       var file = e.target.files[0];
       if (file) {
-        document.getElementById('fileName').textContent = file.name;
+        document.getElementById('fileName').textContent = file.name + ' (' + formatFileSize(file.size) + ')';
       } else {
         document.getElementById('fileName').textContent = 'ยังไม่ได้เลือกไฟล์';
       }
@@ -382,11 +688,25 @@
     document.getElementById('uploadForm').addEventListener('submit', async function(e) {
       e.preventDefault();
       
+      // Validate at least one award is selected
+      var hasAward = document.getElementById('sar').checked ||
+                     document.getElementById('pa_ks4').checked ||
+                     document.getElementById('phet_mathayom').checked ||
+                     document.getElementById('khurusapha').checked ||
+                     document.getElementById('obec').checked ||
+                     document.getElementById('next_gen').checked;
+      
+      if (!hasAward) {
+        showMessage('กรุณาเลือกรางวัล/การประเมินอย่างน้อย 1 รายการ', 'error');
+        return;
+      }
+      
       var formData = {
         title: document.getElementById('title').value,
         date: document.getElementById('date').value,
+        academic_year: document.getElementById('academic_year').value || calculateAcademicYear(document.getElementById('date').value),
         evidence_type: document.getElementById('evidence_type').value,
-        file_type: document.getElementById('file_type').value,
+        impact_level: document.getElementById('impact_level').value,
         description: document.getElementById('description').value,
         sar: document.getElementById('sar').checked,
         pa_ks4: document.getElementById('pa_ks4').checked,
@@ -397,7 +717,6 @@
         krong_ton: document.getElementById('krong_ton').checked,
         krong_kon: document.getElementById('krong_kon').checked,
         krong_ngan: document.getElementById('krong_ngan').checked,
-        impact_level: document.getElementById('impact_level').value,
         status: 'draft'
       };
       
@@ -409,30 +728,27 @@
       var fileInput = document.getElementById('fileInput');
       var file = fileInput.files[0];
       
-      if (file) {
-        var reader = new FileReader();
-        reader.onload = async function(e) {
-          var base64Data = e.target.result.split(',')[1];
-          formData.fileBlob = {
-            bytes: base64Data,
-            mimeType: file.type || 'application/pdf',
-            name: file.name
-          };
-          
-          if (additionalFiles.length > 0) {
-            readAdditionalFiles(0, formData);
-          } else {
-            submitForm(formData);
-          }
+      if (!file) {
+        showMessage('กรุณาแนบไฟล์หลัก', 'error');
+        return;
+      }
+      
+      var reader = new FileReader();
+      reader.onload = async function(e) {
+        var base64Data = e.target.result.split(',')[1];
+        formData.fileBlob = {
+          bytes: base64Data,
+          mimeType: file.type || 'application/pdf',
+          name: file.name
         };
-        reader.readAsDataURL(file);
-      } else {
+        
         if (additionalFiles.length > 0) {
           readAdditionalFiles(0, formData);
         } else {
           submitForm(formData);
         }
-      }
+      };
+      reader.readAsDataURL(file);
       
       function readAdditionalFiles(index, formData) {
         if (index >= additionalFiles.length) {
@@ -484,9 +800,11 @@
             setTimeout(function() {
               document.getElementById('uploadForm').reset();
               document.getElementById('date').valueAsDate = new Date();
+              document.getElementById('academic_year').value = calculateAcademicYear(document.getElementById('date').value);
               document.getElementById('fileName').textContent = 'ยังไม่ได้เลือกไฟล์';
               document.getElementById('fileList').innerHTML = 'ยังไม่ได้เลือกไฟล์';
               additionalFiles = [];
+              document.getElementById('summaryBox').style.display = 'none';
               document.getElementById('message').style.display = 'none';
             }, 2000);
           }
@@ -506,7 +824,9 @@
       editId = urlParams.get('edit');
       
       if (!editId) {
-        document.getElementById('date').valueAsDate = new Date();
+        var today = new Date();
+        document.getElementById('date').valueAsDate = today;
+        document.getElementById('academic_year').value = calculateAcademicYear(document.getElementById('date').value);
       }
       
       loadEvidenceTypes(editId);
