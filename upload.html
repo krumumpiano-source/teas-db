@@ -3,42 +3,66 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>อัปโหลดหลักฐาน - TEAS-DB (Teacher Evidence & Achievement System)</title>
+  <title>อัปโหลดหลักฐาน - TEAS-DB</title>
 
-  <!-- ✅ PRODUCTION API -->
   <script>
-    window.API_BASE_URL = 'https://script.google.com/macros/s/AKfycbwfKynl5gMWD1CCecER2er5EZGOnRTkhjHuiBb5yFTAyUtC2mKUepb1c93HcwLZqfcx/exec';
+    window.API_BASE_URL =
+      'https://script.google.com/macros/s/AKfycbwfKynl5gMWD1CCecER2er5EZGOnRTkhjHuiBb5yFTAyUtC2mKUepb1c93HcwLZqfcx/exec';
     window.currentPage = 'upload';
-    var editId = null;
-    var additionalFiles = [];
+    let editId = null;
+    let additionalFiles = [];
   </script>
 
   <style>
-    /* ===== CSS เหมือนเดิมทั้งหมด (ไม่แตะ) ===== */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    button, .nav-btn, .btn { cursor: pointer; }
     body {
       font-family: 'Sarabun', 'Kanit', sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      padding: 20px;
+      background: linear-gradient(135deg,#667eea,#764ba2);
+      padding:20px;
     }
     .container {
-      max-width: 900px;
-      margin: 0 auto;
-      background: white;
-      border-radius: 20px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      overflow: hidden;
+      max-width:900px;
+      margin:auto;
+      background:#fff;
+      border-radius:20px;
+      overflow:hidden;
+      box-shadow:0 20px 60px rgba(0,0,0,.3);
     }
     .header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 30px;
-      text-align: center;
+      padding:30px;
+      color:#fff;
+      text-align:center;
+      background:linear-gradient(135deg,#667eea,#764ba2);
     }
-    .content { padding: 40px; }
-    .required { color: #dc3545; }
+    .content { padding:40px; }
+    .section { margin-bottom:35px; }
+    .section-title {
+      font-size:1.4em;
+      color:#667eea;
+      border-bottom:3px solid #eee;
+      padding-bottom:10px;
+      margin-bottom:20px;
+    }
+    label { font-weight:600; display:block; margin-bottom:6px; }
+    select,input,textarea {
+      width:100%;
+      padding:12px;
+      border-radius:10px;
+      border:2px solid #e9ecef;
+      font-size:1em;
+    }
+    .btn {
+      width:100%;
+      padding:16px;
+      font-size:1.2em;
+      border-radius:12px;
+      border:none;
+      color:#fff;
+      background:linear-gradient(135deg,#667eea,#764ba2);
+      cursor:pointer;
+    }
+    .message { display:none; margin:20px 0; padding:15px; border-radius:8px; }
+    .message.error { background:#f8d7da; color:#721c24; }
+    .message.success { background:#d4edda; color:#155724; }
   </style>
 </head>
 
@@ -52,56 +76,84 @@
 
   <div class="content">
     <div id="message" class="message"></div>
-    <div id="loading" style="display:none;">กำลังบันทึก...</div>
 
-    <!-- ฟอร์มเดิมทั้งหมด -->
-    <!-- ❗ ไม่มีการแก้ HTML โครงสร้าง -->
-    <!-- ❗ ดรอปดาวน์ evidence_type จะโหลดจาก GAS -->
-    <!-- ❗ logic save/update เหมือนเดิม -->
+    <form id="uploadForm">
 
-    <!-- (โค้ด HTML ฟอร์มยาว — คงเดิม 100%) -->
-    <!-- ………………………………………………………………………… -->
+      <div class="section">
+        <h2 class="section-title">📋 ลักษณะของหลักฐาน</h2>
+
+        <label>ประเภทหลักฐาน *</label>
+        <select id="evidence_type" required>
+          <option value="">-- เลือกประเภท --</option>
+        </select>
+
+        <label style="margin-top:15px;">ระดับผลกระทบ</label>
+        <select id="impact_level">
+          <option value="">-- เลือกระดับ --</option>
+          <option value="classroom">ห้องเรียน</option>
+          <option value="school">โรงเรียน</option>
+          <option value="district">เขต / จังหวัด</option>
+          <option value="national">ระดับประเทศ</option>
+        </select>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title">📝 ข้อมูลหลักฐาน</h2>
+
+        <label>ชื่อหลักฐาน *</label>
+        <input id="title" required>
+
+        <label style="margin-top:15px;">วันที่ *</label>
+        <input type="date" id="date" required>
+
+        <label style="margin-top:15px;">คำอธิบาย</label>
+        <textarea id="description" rows="4"></textarea>
+      </div>
+
+      <div class="section">
+        <h2 class="section-title">📎 แนบไฟล์</h2>
+        <input type="file" id="fileInput" required>
+      </div>
+
+      <button class="btn" type="submit">💾 บันทึกหลักฐาน</button>
+    </form>
   </div>
 </div>
 
 <script>
 /* ===============================
-   COMMON + LOGIC (เหมือนเดิม)
+   ประเภทหลักฐาน (กำหนดตายตัว)
    =============================== */
+const EVIDENCE_TYPES = [
+  { value: 'lesson_plan', label: 'แผนการจัดการเรียนรู้' },
+  { value: 'activity', label: 'กิจกรรม / โครงการ' },
+  { value: 'student_work', label: 'ผลงานนักเรียน' },
+  { value: 'official_doc', label: 'หนังสือราชการ / คำสั่ง' },
+  { value: 'award', label: 'รางวัล / เกียรติบัตร' },
+  { value: 'other', label: 'อื่น ๆ' }
+];
 
-(function() {
-  fetch('common.html')
-    .then(r => r.text())
-    .then(html => {
-      const doc = new DOMParser().parseFromString(html,'text/html');
-      doc.querySelectorAll('script').forEach(s=>{
-        const ns=document.createElement('script');
-        ns.textContent=s.textContent;
-        document.head.appendChild(ns);
-      });
-      const nav=doc.querySelector('.nav');
-      if(nav){
-        document.getElementById('nav-container').innerHTML=nav.outerHTML;
-        setTimeout(()=>window.setActiveMenu&&setActiveMenu(),100);
-      }
-    });
-})();
-
-function initPage(){
-  const p=new URLSearchParams(location.search);
-  editId=p.get('edit');
-  if(!editId){
-    const d=new Date();
-    document.getElementById('date').valueAsDate=d;
-    document.getElementById('academic_year').value=calculateAcademicYear(d.toISOString());
-  }
-  loadEvidenceTypes(editId);
+function loadEvidenceTypesHardcode() {
+  const select = document.getElementById('evidence_type');
+  EVIDENCE_TYPES.forEach(t => {
+    const o = document.createElement('option');
+    o.value = t.value;
+    o.textContent = t.label;
+    select.appendChild(o);
+  });
 }
 
-document.readyState==='loading'
-  ? document.addEventListener('DOMContentLoaded',initPage)
-  : initPage();
-</script>
+function showMessage(text,type){
+  const m=document.getElementById('message');
+  m.textContent=text;
+  m.className='message '+type;
+  m.style.display='block';
+}
 
+document.addEventListener('DOMContentLoaded', () => {
+  loadEvidenceTypesHardcode();
+  document.getElementById('date').valueAsDate = new Date();
+});
+</script>
 </body>
 </html>
