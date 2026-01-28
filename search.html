@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ค้นหาหลักฐาน - TEAS-DB (Teacher Evidence & Achievement System)</title>
+  <script>
+    window.API_BASE_URL = 'https://script.google.com/macros/s/AKfycbwfKynl5gMWD1CCecER2er5EZGOnRTkhjHuiBb5yFTAyUtC2mKUepb1c93HcwLZqfcx/exec';
+    window.currentPage = 'search';
+  </script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    button, .nav-btn, .btn, .result-item { cursor: pointer; }
+    body {
+      font-family: 'Sarabun', 'Kanit', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+    .nav {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 20px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      border-bottom: 3px solid #667eea;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .nav-btn {
+      padding: 12px 20px;
+      background: white;
+      border: 2px solid #667eea;
+      color: #667eea;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.95em;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .nav-btn:hover {
+      color: white;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .nav-btn.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .content { padding: 40px; }
+    .search-form {
+      background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 20px rgba(102, 126, 234, 0.1);
+    }
+    .form-group { margin-bottom: 20px; }
+    .form-group label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 600;
+      color: #333;
+    }
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #e9ecef;
+      border-radius: 10px;
+      font-size: 1em;
+    }
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    .btn {
+      padding: 14px 28px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5); }
+    .results { margin-top: 30px; }
+    .result-item {
+      background: white;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .result-item:hover {
+      border-color: #667eea;
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.25);
+      transform: translateY(-2px);
+    }
+    .result-title {
+      font-size: 1.2em;
+      font-weight: 600;
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+    .result-meta { color: #666; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🔍 ค้นหาหลักฐาน</h1>
+    </div>
+    <div id="nav-container"></div>
+    <div class="content">
+      <div class="search-form">
+        <div class="form-group">
+          <label>ค้นหาชื่อหลักฐาน</label>
+          <input type="text" id="searchTitle" placeholder="พิมพ์ชื่อหลักฐาน...">
+        </div>
+        <div class="form-group">
+          <label>ประเภทหลักฐาน</label>
+          <select id="searchType">
+            <option value="">ทั้งหมด</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>ปีการศึกษา</label>
+          <input type="text" id="searchYear" placeholder="เช่น 2567">
+        </div>
+        <div class="form-group">
+          <label>รางวัล</label>
+          <select id="searchAward">
+            <option value="">ทั้งหมด</option>
+            <option value="sar">SAR</option>
+            <option value="pa_ks4">วิทยฐานะ คศ.4</option>
+            <option value="phet_mathayom">เพชรมัธยมพะเยา</option>
+            <option value="khurusapha">รางวัลคุรุสภา</option>
+            <option value="obec">OBEC Awards</option>
+            <option value="next_gen">Next Gen Teacher</option>
+          </select>
+        </div>
+        <button class="btn" onclick="performSearch()">🔍 ค้นหา</button>
+      </div>
+      <div id="results" class="results">
+        <p style="text-align: center; color: #666;">กรุณากรอกข้อมูลเพื่อค้นหา</p>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    var API_BASE_URL = window.API_BASE_URL;
+    
+    // Load navigation and common functions from common.html
+    (function() {
+      fetch('common.html')
+        .then(response => response.text())
+        .then(html => {
+          var parser = new DOMParser();
+          var doc = parser.parseFromString(html, 'text/html');
+          
+          // Extract and execute scripts from common.html
+          var scripts = doc.querySelectorAll('script');
+          scripts.forEach(function(script) {
+            var newScript = document.createElement('script');
+            newScript.textContent = script.textContent;
+            document.head.appendChild(newScript);
+          });
+          
+          // Load navigation
+          var nav = doc.querySelector('.nav');
+          if (nav) {
+            document.getElementById('nav-container').innerHTML = nav.outerHTML;
+            setTimeout(function() {
+              if (typeof setActiveMenu === 'function') {
+                setActiveMenu();
+              }
+            }, 100);
+          }
+        })
+        .catch(function(error) {
+          console.error('Error loading common.html:', error);
+        });
+    })();
+    
+    async function loadEvidenceTypes() {
+      try {
+        var types = [];
+        var useApiData = false;
+        
+        try {
+          var result = await apiCall('getEvidenceTypes', {});
+          
+          // Handle different response formats
+          if (Array.isArray(result)) {
+            types = result;
+            useApiData = true;
+          } else if (result && Array.isArray(result.types) && result.types.length > 0) {
+            types = result.types;
+            useApiData = true;
+          } else if (result && result.success && Array.isArray(result.data) && result.data.length > 0) {
+            types = result.data;
+            useApiData = true;
+          }
+        } catch(apiError) {
+          console.warn('API call failed, using hardcoded types:', apiError);
+        }
+        
+        // Fallback to hardcoded types matching the sheet structure
+        if (!useApiData || types.length === 0) {
+          types = [
+            { value: 'lesson_plan', label: 'แผนการสอน' },
+            { value: 'activity', label: 'กิจกรรม' },
+            { value: 'student_work', label: 'ผลงานนักเรียน' },
+            { value: 'official_doc', label: 'หนังสือราชการ' },
+            { value: 'award', label: 'รางวัล / เกียรติบัตร' },
+            { value: 'other', label: 'อื่น ๆ' }
+          ];
+        }
+        
+        var select = document.getElementById('searchType');
+        if (!select) return;
+        
+        // Clear existing options except the placeholder
+        while (select.options.length > 1) {
+          select.remove(1);
+        }
+        
+        if (types && types.length > 0) {
+          types.forEach(function(type) {
+            var option = document.createElement('option');
+            option.value = type.value || type.code || type.id;
+            option.textContent = type.label || type.name || type.text;
+            select.appendChild(option);
+          });
+        }
+      } catch(error) {
+        console.error('Error loading evidence types:', error);
+        // Fallback to hardcoded types on error
+        var select = document.getElementById('searchType');
+        if (select && select.options.length === 1) {
+          var hardcodedTypes = [
+            { value: 'lesson_plan', label: 'แผนการสอน' },
+            { value: 'activity', label: 'กิจกรรม' },
+            { value: 'student_work', label: 'ผลงานนักเรียน' },
+            { value: 'official_doc', label: 'หนังสือราชการ' },
+            { value: 'award', label: 'รางวัล / เกียรติบัตร' },
+            { value: 'other', label: 'อื่น ๆ' }
+          ];
+          hardcodedTypes.forEach(function(type) {
+            var option = document.createElement('option');
+            option.value = type.value;
+            option.textContent = type.label;
+            select.appendChild(option);
+          });
+        }
+      }
+    }
+    
+    async function performSearch() {
+      var params = {
+        title: document.getElementById('searchTitle').value,
+        evidence_type: document.getElementById('searchType').value,
+        academic_year: document.getElementById('searchYear').value,
+        award: document.getElementById('searchAward').value
+      };
+      
+      var resultsDiv = document.getElementById('results');
+      showLoading('results');
+      
+      try {
+        var result = await apiCall('searchEvidence', {searchParams: params});
+        
+        if (result.success) {
+          displayResults(result.results);
+        } else {
+          resultsDiv.innerHTML = '<div style="text-align: center; color: #dc3545; padding: 20px;">เกิดข้อผิดพลาด: ' + (result.message || 'ไม่สามารถค้นหาได้') + '</div>';
+        }
+      } catch(error) {
+        resultsDiv.innerHTML = '<div style="text-align: center; color: #dc3545; padding: 20px;">เกิดข้อผิดพลาด: ' + handleError(error, 'performSearch') + '</div>';
+      }
+    }
+    
+    function displayResults(results) {
+      var resultsDiv = document.getElementById('results');
+      var html = '<h3 style="margin-bottom: 20px;">พบ ' + results.length + ' รายการ</h3>';
+      
+      if (results.length === 0) {
+        html += '<p style="text-align: center; color: #666; padding: 40px;">ไม่พบผลลัพธ์</p>';
+      } else {
+        results.forEach(function(evidence) {
+          if (!evidence.evidence_id) return;
+          
+          html += '<div class="result-item" onclick="viewEvidence(\'' + evidence.evidence_id + '\')">';
+          html += '<div class="result-title">' + (evidence.title || 'ไม่มีชื่อ') + '</div>';
+          html += '<div class="result-meta">';
+          html += 'ประเภท: ' + (evidence.evidence_type || '-') + ' | ';
+          html += 'วันที่: ' + (evidence.date || '-') + ' | ';
+          html += 'ปีการศึกษา: ' + (evidence.academic_year || '-');
+          html += '</div>';
+          html += '</div>';
+        });
+      }
+      
+      resultsDiv.innerHTML = html;
+    }
+    
+    function viewEvidence(id) {
+      if (!id) {
+        alert('ไม่พบ ID ของหลักฐาน');
+        return;
+      }
+      window.location.href = 'view.html?id=' + encodeURIComponent(id);
+    }
+    
+    function initPage() {
+      loadEvidenceTypes();
+    }
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
+    }
+  </script>
+</body>
+</html>

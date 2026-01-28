@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>อัปโหลดหลักฐาน - TEAS-DB (Teacher Evidence & Achievement System)</title>
+  <script>
+    window.API_BASE_URL = 'https://script.google.com/macros/s/AKfycbwfKynl5gMWD1CCecER2er5EZGOnRTkhjHuiBb5yFTAyUtC2mKUepb1c93HcwLZqfcx/exec';
+    window.currentPage = 'upload';
+    var editId = null;
+    var additionalFiles = [];
+  </script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    button, .nav-btn, .btn { cursor: pointer; }
+    body {
+      font-family: 'Sarabun', 'Kanit', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+    .nav {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 20px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      border-bottom: 3px solid #667eea;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .nav-btn {
+      padding: 12px 20px;
+      background: white;
+      border: 2px solid #667eea;
+      color: #667eea;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.95em;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .nav-btn:hover {
+      color: white;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .nav-btn.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .content { padding: 40px; }
+    
+    /* SECTION 0: Context Bar */
+    .context-bar {
+      background: #fff3cd;
+      border-left: 4px solid #ffc107;
+      padding: 15px 20px;
+      margin-bottom: 30px;
+      border-radius: 8px;
+      font-size: 0.95em;
+      color: #856404;
+    }
+    .context-bar strong {
+      color: #856404;
+    }
+    
+    /* Section Styling */
+    .section {
+      margin-bottom: 35px;
+    }
+    .section-title {
+      font-size: 1.4em;
+      color: #667eea;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 3px solid #e9ecef;
+      font-weight: 700;
+    }
+    .section-subtitle {
+      font-size: 1.1em;
+      color: #495057;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+    
+    .form-group { margin-bottom: 20px; }
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 600;
+      font-size: 1em;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e9ecef;
+      border-radius: 10px;
+      font-size: 1em;
+      font-family: inherit;
+      transition: border-color 0.3s;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    .form-group .help-text {
+      font-size: 0.85em;
+      color: #6c757d;
+      margin-top: 5px;
+      font-style: italic;
+    }
+    
+    /* Checkbox Group */
+    .checkbox-group {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+    .checkbox-item:hover {
+      background: #e9ecef;
+    }
+    .checkbox-item input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+    }
+    .checkbox-item label {
+      margin: 0;
+      font-weight: normal;
+      cursor: pointer;
+      flex: 1;
+    }
+    
+    /* File Upload */
+    .file-upload {
+      border: 2px dashed #667eea;
+      border-radius: 10px;
+      padding: 25px;
+      text-align: center;
+      background: #f8f9ff;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .file-upload:hover {
+      background: #f0f2ff;
+      border-color: #5568d3;
+    }
+    .file-upload input[type="file"] { display: none; }
+    .file-upload-label {
+      font-weight: 600;
+      color: #667eea;
+      margin-bottom: 8px;
+      display: block;
+    }
+    .file-upload-hint {
+      font-size: 0.9em;
+      color: #6c757d;
+      margin-top: 5px;
+    }
+    .file-name-display {
+      margin-top: 10px;
+      padding: 10px;
+      background: white;
+      border-radius: 5px;
+      color: #495057;
+      font-weight: 500;
+    }
+    .file-list {
+      margin-top: 10px;
+      text-align: left;
+      padding: 10px;
+      background: white;
+      border-radius: 5px;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+    .file-item {
+      padding: 8px 12px;
+      margin: 5px 0;
+      background: #f8f9fa;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .file-item-remove {
+      color: #dc3545;
+      cursor: pointer;
+      font-weight: bold;
+      padding: 0 10px;
+      font-size: 1.2em;
+    }
+    .file-item-remove:hover {
+      color: #c82333;
+    }
+    
+    /* Summary Box */
+    .summary-box {
+      background: #e7f3ff;
+      border: 2px solid #667eea;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 30px 0;
+    }
+    .summary-box-title {
+      font-size: 1.2em;
+      font-weight: 700;
+      color: #667eea;
+      margin-bottom: 15px;
+    }
+    .summary-item {
+      margin: 8px 0;
+      padding: 8px 0;
+      border-bottom: 1px solid #cfe2ff;
+    }
+    .summary-item:last-child {
+      border-bottom: none;
+    }
+    .summary-label {
+      font-weight: 600;
+      color: #495057;
+      display: inline-block;
+      min-width: 150px;
+    }
+    .summary-value {
+      color: #212529;
+    }
+    .summary-awards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 5px;
+    }
+    .summary-award-badge {
+      background: #667eea;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 15px;
+      font-size: 0.9em;
+      font-weight: 500;
+    }
+    
+    .btn {
+      padding: 16px 32px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.2em;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .message {
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      display: none;
+    }
+    .message.success { background: #d4edda; color: #155724; }
+    .message.error { background: #f8d7da; color: #721c24; }
+    
+    .required { color: #dc3545; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📤 อัปโหลดหลักฐาน</h1>
+    </div>
+    <div id="nav-container"></div>
+    <div class="content">
+      <div id="message" class="message"></div>
+      <div id="loading" style="display: none;">กำลังบันทึก...</div>
+      
+      <form id="uploadForm">
+        <!-- SECTION 0: Context Bar -->
+        <div class="context-bar">
+          <strong>💡 ข้อมูลสำคัญ:</strong> หลักฐาน 1 ชิ้น สามารถใช้ได้หลายรางวัล ระบบจะช่วยคำนวณให้
+        </div>
+        
+        <!-- SECTION 1: เป้าหมายของหลักฐาน -->
+        <div class="section">
+          <h2 class="section-title">🎯 เป้าหมายของหลักฐาน</h2>
+          <p class="section-subtitle">ใช้หลักฐานนี้กับรางวัล / การประเมินใดบ้าง <span class="required">*</span></p>
+          <div class="checkbox-group">
+            <div class="checkbox-item">
+              <input type="checkbox" id="sar" name="sar" value="true">
+              <label for="sar">📘 SAR</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="pa_ks4" name="pa_ks4" value="true">
+              <label for="pa_ks4">🎓 วิทยฐานะ คศ.4</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="phet_mathayom" name="phet_mathayom" value="true">
+              <label for="phet_mathayom">💎 เพชรมัธยมพะเยา</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="khurusapha" name="khurusapha" value="true">
+              <label for="khurusapha">🏛 รางวัลคุรุสภา</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="obec" name="obec" value="true">
+              <label for="obec">🏆 OBEC Awards</label>
+            </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="next_gen" name="next_gen" value="true">
+              <label for="next_gen">🌱 Next Gen Teacher</label>
+            </div>
+          </div>
+          
+          <!-- เพชรมัธยมพะเยา (เฉพาะ) -->
+          <div style="margin-top: 25px;">
+            <p class="section-subtitle">💎 เพชรมัธยมพะเยา (เฉพาะ)</p>
+            <div class="checkbox-group">
+              <div class="checkbox-item">
+                <input type="checkbox" id="krong_ton" name="krong_ton" value="true">
+                <label for="krong_ton">ครองตน</label>
+              </div>
+              <div class="checkbox-item">
+                <input type="checkbox" id="krong_kon" name="krong_kon" value="true">
+                <label for="krong_kon">ครองคน</label>
+              </div>
+              <div class="checkbox-item">
+                <input type="checkbox" id="krong_ngan" name="krong_ngan" value="true">
+                <label for="krong_ngan">ครองงาน</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- SECTION 2: ลักษณะของหลักฐาน -->
+        <div class="section">
+          <h2 class="section-title">📋 ลักษณะของหลักฐาน</h2>
+          
+        <div class="form-group">
+          <label>1️⃣ ประเภทหลักฐาน <span class="required">*</span></label>
+          <select id="evidence_type" name="evidence_type" required>
+            <option value="">-- เลือกประเภท --</option>
+            <option value="lesson_plan">แผนการสอน</option>
+            <option value="activity">กิจกรรม</option>
+            <option value="student_work">ผลงานนักเรียน</option>
+            <option value="official_doc">หนังสือราชการ</option>
+            <option value="award">รางวัล / เกียรติบัตร</option>
+            <option value="other">อื่น ๆ</option>
+          </select>
+          <div class="help-text">ตัวเลือกนี้จะช่วยให้ระบบจัดเก็บและค้นหาหลักฐานได้ถูกต้อง</div>
+        </div>
+          
+          <div class="form-group">
+            <label>2️⃣ ระดับผลกระทบ</label>
+            <select id="impact_level" name="impact_level">
+              <option value="">-- เลือกระดับ --</option>
+              <option value="classroom">ห้องเรียน</option>
+              <option value="school">โรงเรียน</option>
+              <option value="district">เขต / จังหวัด</option>
+              <option value="national">ระดับประเทศ</option>
+            </select>
+            <div class="help-text">สำคัญมากสำหรับ "เพชรมัธยมพะเยา" และ "OBEC Awards"</div>
+          </div>
+        </div>
+        
+        <!-- SECTION 3: ระบุตัวตนของหลักฐาน -->
+        <div class="section">
+          <h2 class="section-title">📝 ระบุตัวตนของหลักฐาน</h2>
+          
+          <div class="form-group">
+            <label>ชื่อหลักฐาน <span class="required">*</span></label>
+            <input type="text" id="title" name="title" required placeholder="เช่น แผนการจัดการเรียนรู้ หน่วยที่ 1">
+          </div>
+          
+          <div class="form-group">
+            <label>วันที่เกิดกิจกรรม / วันที่ของหลักฐาน <span class="required">*</span></label>
+            <input type="date" id="date" name="date" required>
+          </div>
+          
+          <div class="form-group">
+            <label>ปีการศึกษา</label>
+            <input type="text" id="academic_year" name="academic_year" readonly style="background: #e9ecef;">
+            <div class="help-text">จะคำนวณอัตโนมัติจากวันที่ (สามารถแก้ไขได้)</div>
+          </div>
+        </div>
+        
+        <!-- SECTION 4: คำอธิบายหลักฐาน -->
+        <div class="section">
+          <h2 class="section-title">📄 คำอธิบายหลักฐาน</h2>
+          <p class="section-subtitle">อธิบายให้ระบบเข้าใจ (ใช้สำหรับ SAR อัตโนมัติ)</p>
+          
+          <div class="form-group">
+            <label>คำอธิบายหลักฐาน</label>
+            <textarea id="description" name="description" rows="5" placeholder="แนะนำให้เขียน:&#10;- ใคร ทำอะไร&#10;- เพื่ออะไร&#10;- เชื่อมกับตัวชี้วัดใด"></textarea>
+            <div class="help-text">ช่องนี้ไม่ใช่ช่องเล่าเรื่อง แต่คือ input สำหรับ SAR</div>
+          </div>
+        </div>
+        
+        <!-- SECTION 5: แนบไฟล์ -->
+        <div class="section">
+          <h2 class="section-title">📎 แนบไฟล์</h2>
+          
+          <div class="form-group">
+            <label class="file-upload-label">ไฟล์หลัก <span class="required">*</span></label>
+            <div class="file-upload" onclick="document.getElementById('fileInput').click()">
+              <div class="file-upload-label">📎 คลิกเพื่อเลือกไฟล์หลัก</div>
+              <div class="file-upload-hint">1 ไฟล์ (แนะนำ: PDF / DOC / ฯลฯ)</div>
+              <div class="file-name-display" id="fileName">ยังไม่ได้เลือกไฟล์</div>
+              <input type="file" id="fileInput" name="file">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="file-upload-label">ไฟล์เพิ่มเติม (ไม่บังคับ)</label>
+            <div class="file-upload" onclick="document.getElementById('additionalFilesInput').click()">
+              <div class="file-upload-label">📎 คลิกเพื่อเลือกไฟล์เพิ่มเติม</div>
+              <div class="file-upload-hint">รูปภาพ, เอกสารเสริม (เลือกหลายไฟล์ได้)</div>
+              <div class="file-list" id="fileList">ยังไม่ได้เลือกไฟล์</div>
+              <input type="file" id="additionalFilesInput" name="additionalFiles" multiple>
+            </div>
+          </div>
+        </div>
+        
+        <!-- SECTION 6: ตรวจสอบก่อนบันทึก -->
+        <div class="section">
+          <div class="summary-box" id="summaryBox" style="display: none;">
+            <div class="summary-box-title">✅ ตรวจสอบก่อนบันทึก</div>
+            <div id="summaryContent"></div>
+          </div>
+        </div>
+        
+        <!-- SECTION 7: ปุ่มบันทึก -->
+        <button type="submit" class="btn" id="submitBtn">💾 บันทึกหลักฐาน</button>
+      </form>
+    </div>
+  </div>
+  
+  <script>
+    // Load navigation and common functions from common.html
+    (function() {
+      fetch('common.html')
+        .then(response => response.text())
+        .then(html => {
+          var parser = new DOMParser();
+          var doc = parser.parseFromString(html, 'text/html');
+          
+          // Extract and execute scripts from common.html
+          var scripts = doc.querySelectorAll('script');
+          scripts.forEach(function(script) {
+            var newScript = document.createElement('script');
+            newScript.textContent = script.textContent;
+            document.head.appendChild(newScript);
+          });
+          
+          // Load navigation
+          var nav = doc.querySelector('.nav');
+          if (nav) {
+            document.getElementById('nav-container').innerHTML = nav.outerHTML;
+            setTimeout(function() {
+              if (typeof setActiveMenu === 'function') {
+                setActiveMenu();
+              }
+            }, 100);
+          }
+          
+          // Wait for apiCall to be available, then initialize page
+          setTimeout(function() {
+            if (typeof apiCall === 'function') {
+              initPage();
+            } else {
+              console.error('apiCall function not found after loading common.html');
+              // Retry after a bit more time
+              setTimeout(function() {
+                if (typeof apiCall === 'function') {
+                  initPage();
+                } else {
+                  console.error('Failed to load apiCall function');
+                  showMessage('ไม่สามารถโหลดฟังก์ชัน API ได้ กรุณารีเฟรชหน้าเว็บ', 'error');
+                }
+              }, 500);
+            }
+          }, 200);
+        })
+        .catch(function(error) {
+          console.error('Error loading common.html:', error);
+          showMessage('ไม่สามารถโหลดไฟล์ common.html ได้', 'error');
+        });
+    })();
+    
+    var API_BASE_URL = window.API_BASE_URL;
+    
+    var additionalFiles = [];
+    
+    // Calculate academic year from date
+    function calculateAcademicYear(dateStr) {
+      if (!dateStr) return '';
+      var date = new Date(dateStr);
+      var month = date.getMonth() + 1;
+      var year = date.getFullYear();
+      var beYear = year + 543;
+      
+      if (month >= 5) {
+        return beYear.toString();
+      } else {
+        return (beYear - 1).toString();
+      }
+    }
+    
+    // Update summary box
+    function updateSummary() {
+      var summaryBox = document.getElementById('summaryBox');
+      var summaryContent = document.getElementById('summaryContent');
+      
+      var selectedAwards = [];
+      if (document.getElementById('sar').checked) selectedAwards.push('SAR');
+      if (document.getElementById('pa_ks4').checked) selectedAwards.push('วิทยฐานะ คศ.4');
+      if (document.getElementById('phet_mathayom').checked) selectedAwards.push('เพชรมัธยมพะเยา');
+      if (document.getElementById('khurusapha').checked) selectedAwards.push('คุรุสภา');
+      if (document.getElementById('obec').checked) selectedAwards.push('OBEC Awards');
+      if (document.getElementById('next_gen').checked) selectedAwards.push('Next Gen Teacher');
+      
+      var evidenceType = document.getElementById('evidence_type');
+      var evidenceTypeText = evidenceType.options[evidenceType.selectedIndex]?.text || 'ยังไม่ได้เลือก';
+      
+      var date = document.getElementById('date').value;
+      var academicYear = calculateAcademicYear(date) || 'ยังไม่ได้ระบุ';
+      
+      if (selectedAwards.length > 0 || evidenceType.value || date) {
+        var html = '';
+        
+        if (selectedAwards.length > 0) {
+          html += '<div class="summary-item">';
+          html += '<span class="summary-label">จะถูกนับใน:</span>';
+          html += '<div class="summary-awards">';
+          selectedAwards.forEach(function(award) {
+            html += '<span class="summary-award-badge">' + award + '</span>';
+          });
+          html += '</div></div>';
+        }
+        
+        html += '<div class="summary-item">';
+        html += '<span class="summary-label">ประเภท:</span>';
+        html += '<span class="summary-value">' + evidenceTypeText + '</span>';
+        html += '</div>';
+        
+        html += '<div class="summary-item">';
+        html += '<span class="summary-label">ปีการศึกษา:</span>';
+        html += '<span class="summary-value">' + academicYear + '</span>';
+        html += '</div>';
+        
+        summaryContent.innerHTML = html;
+        summaryBox.style.display = 'block';
+      } else {
+        summaryBox.style.display = 'none';
+      }
+    }
+    
+    // Add event listeners for summary updates
+    function setupSummaryListeners() {
+      var checkboxes = ['sar', 'pa_ks4', 'phet_mathayom', 'khurusapha', 'obec', 'next_gen'];
+      checkboxes.forEach(function(id) {
+        document.getElementById(id).addEventListener('change', updateSummary);
+      });
+      
+      document.getElementById('evidence_type').addEventListener('change', updateSummary);
+      document.getElementById('date').addEventListener('change', function() {
+        var academicYearInput = document.getElementById('academic_year');
+        academicYearInput.value = calculateAcademicYear(this.value);
+        updateSummary();
+      });
+    }
+    
+    async function loadEvidenceTypes(editId) {
+      try {
+        // Try to load from API first, but fallback to hardcoded values if API fails
+        var types = [];
+        var useApiData = false;
+        
+        try {
+          console.log('Loading evidence types from API...');
+          var result = await apiCall('getEvidenceTypes', {});
+          console.log('API Response:', result);
+          
+          // Handle different response formats
+          if (Array.isArray(result)) {
+            types = result;
+            useApiData = true;
+          } else if (result && Array.isArray(result.types) && result.types.length > 0) {
+            types = result.types;
+            useApiData = true;
+          } else if (result && result.success && Array.isArray(result.data) && result.data.length > 0) {
+            types = result.data;
+            useApiData = true;
+          }
+        } catch(apiError) {
+          console.warn('API call failed, using hardcoded types:', apiError);
+        }
+        
+        // Fallback to hardcoded types matching the sheet structure
+        if (!useApiData || types.length === 0) {
+          console.log('Using hardcoded evidence types from sheet structure');
+          types = [
+            { value: 'lesson_plan', label: 'แผนการสอน' },
+            { value: 'activity', label: 'กิจกรรม' },
+            { value: 'student_work', label: 'ผลงานนักเรียน' },
+            { value: 'official_doc', label: 'หนังสือราชการ' },
+            { value: 'award', label: 'รางวัล / เกียรติบัตร' },
+            { value: 'other', label: 'อื่น ๆ' }
+          ];
+        }
+        
+        var select = document.getElementById('evidence_type');
+        if (!select) {
+          console.error('Evidence type select element not found!');
+          return;
+        }
+        
+        // Clear existing options except the placeholder
+        while (select.options.length > 1) {
+          select.remove(1);
+        }
+        
+        // Populate dropdown
+        if (types && types.length > 0) {
+          types.forEach(function(type) {
+            var option = document.createElement('option');
+            option.value = type.value || type.code || type.id;
+            option.textContent = type.label || type.name || type.text;
+            select.appendChild(option);
+          });
+          console.log('Successfully loaded ' + types.length + ' evidence types');
+          
+          // Hide error message if types loaded successfully
+          var messageDiv = document.getElementById('message');
+          if (messageDiv && messageDiv.className.includes('error')) {
+            messageDiv.style.display = 'none';
+          }
+        }
+        
+        if (editId) {
+          loadEvidenceData(editId);
+        }
+        
+        setupSummaryListeners();
+      } catch(error) {
+        console.error('Error loading types:', error);
+        // Even if there's an error, ensure dropdown has hardcoded options
+        var select = document.getElementById('evidence_type');
+        if (select && select.options.length === 1) {
+          var hardcodedTypes = [
+            { value: 'lesson_plan', label: 'แผนการสอน' },
+            { value: 'activity', label: 'กิจกรรม' },
+            { value: 'student_work', label: 'ผลงานนักเรียน' },
+            { value: 'official_doc', label: 'หนังสือราชการ' },
+            { value: 'award', label: 'รางวัล / เกียรติบัตร' },
+            { value: 'other', label: 'อื่น ๆ' }
+          ];
+          hardcodedTypes.forEach(function(type) {
+            var option = document.createElement('option');
+            option.value = type.value;
+            option.textContent = type.label;
+            select.appendChild(option);
+          });
+          console.log('Loaded hardcoded types as fallback');
+        }
+      }
+    }
+    
+    async function loadEvidenceData(editId) {
+      try {
+        var result = await apiCall('getEvidenceById', {evidenceId: editId});
+        
+        if (result.success && result.evidence) {
+          var ev = result.evidence;
+          document.getElementById('title').value = ev.title || '';
+          document.getElementById('date').value = ev.date || '';
+          document.getElementById('evidence_type').value = ev.evidence_type || '';
+          document.getElementById('impact_level').value = ev.impact_level || '';
+          document.getElementById('description').value = ev.description || '';
+          document.getElementById('academic_year').value = ev.academic_year || calculateAcademicYear(ev.date || '');
+          
+          document.getElementById('sar').checked = ev.sar === true || ev.sar === 'TRUE';
+          document.getElementById('pa_ks4').checked = ev.pa_ks4 === true || ev.pa_ks4 === 'TRUE';
+          document.getElementById('phet_mathayom').checked = ev.phet_mathayom === true || ev.phet_mathayom === 'TRUE';
+          document.getElementById('khurusapha').checked = ev.khurusapha === true || ev.khurusapha === 'TRUE';
+          document.getElementById('obec').checked = ev.obec === true || ev.obec === 'TRUE';
+          document.getElementById('next_gen').checked = ev.next_gen === true || ev.next_gen === 'TRUE';
+          document.getElementById('krong_ton').checked = ev.krong_ton === true || ev.krong_ton === 'TRUE';
+          document.getElementById('krong_kon').checked = ev.krong_kon === true || ev.krong_kon === 'TRUE';
+          document.getElementById('krong_ngan').checked = ev.krong_ngan === true || ev.krong_ngan === 'TRUE';
+          
+          document.getElementById('submitBtn').textContent = '💾 อัปเดตหลักฐาน';
+          document.querySelector('.header h1').textContent = '✏️ แก้ไขหลักฐาน';
+          
+          updateSummary();
+        }
+      } catch(error) {
+        console.error('Error loading evidence:', error);
+      }
+    }
+    
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+      var file = e.target.files[0];
+      if (file) {
+        document.getElementById('fileName').textContent = file.name + ' (' + formatFileSize(file.size) + ')';
+      } else {
+        document.getElementById('fileName').textContent = 'ยังไม่ได้เลือกไฟล์';
+      }
+    });
+    
+    document.getElementById('additionalFilesInput').addEventListener('change', function(e) {
+      var files = Array.from(e.target.files);
+      additionalFiles = files;
+      updateFileList();
+    });
+    
+    function updateFileList() {
+      var fileListDiv = document.getElementById('fileList');
+      if (additionalFiles.length === 0) {
+        fileListDiv.innerHTML = 'ยังไม่ได้เลือกไฟล์';
+        return;
+      }
+      
+      fileListDiv.innerHTML = '';
+      additionalFiles.forEach(function(file, index) {
+        var fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        fileItem.innerHTML = '<span>' + file.name + ' (' + formatFileSize(file.size) + ')</span>' +
+                           '<span class="file-item-remove" onclick="removeFile(' + index + ')">✕</span>';
+        fileListDiv.appendChild(fileItem);
+      });
+    }
+    
+    function removeFile(index) {
+      additionalFiles.splice(index, 1);
+      updateFileList();
+      var dt = new DataTransfer();
+      additionalFiles.forEach(function(file) {
+        dt.items.add(file);
+      });
+      document.getElementById('additionalFilesInput').files = dt.files;
+    }
+    
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      var k = 1024;
+      var sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      var i = Math.floor(Math.log(bytes) / Math.log(k));
+      return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    }
+    
+    document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      // Validate at least one award is selected
+      var hasAward = document.getElementById('sar').checked ||
+                     document.getElementById('pa_ks4').checked ||
+                     document.getElementById('phet_mathayom').checked ||
+                     document.getElementById('khurusapha').checked ||
+                     document.getElementById('obec').checked ||
+                     document.getElementById('next_gen').checked;
+      
+      if (!hasAward) {
+        showMessage('กรุณาเลือกรางวัล/การประเมินอย่างน้อย 1 รายการ', 'error');
+        return;
+      }
+      
+      var formData = {
+        title: document.getElementById('title').value,
+        date: document.getElementById('date').value,
+        academic_year: document.getElementById('academic_year').value || calculateAcademicYear(document.getElementById('date').value),
+        evidence_type: document.getElementById('evidence_type').value,
+        impact_level: document.getElementById('impact_level').value,
+        description: document.getElementById('description').value,
+        sar: document.getElementById('sar').checked,
+        pa_ks4: document.getElementById('pa_ks4').checked,
+        phet_mathayom: document.getElementById('phet_mathayom').checked,
+        khurusapha: document.getElementById('khurusapha').checked,
+        obec: document.getElementById('obec').checked,
+        next_gen: document.getElementById('next_gen').checked,
+        krong_ton: document.getElementById('krong_ton').checked,
+        krong_kon: document.getElementById('krong_kon').checked,
+        krong_ngan: document.getElementById('krong_ngan').checked,
+        status: 'draft'
+      };
+      
+      if (!formData.title || !formData.date || !formData.evidence_type) {
+        showMessage('กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน', 'error');
+        return;
+      }
+      
+      var fileInput = document.getElementById('fileInput');
+      var file = fileInput.files[0];
+      
+      if (!file) {
+        showMessage('กรุณาแนบไฟล์หลัก', 'error');
+        return;
+      }
+      
+      var reader = new FileReader();
+      reader.onload = async function(e) {
+        var base64Data = e.target.result.split(',')[1];
+        formData.fileBlob = {
+          bytes: base64Data,
+          mimeType: file.type || 'application/pdf',
+          name: file.name
+        };
+        
+        if (additionalFiles.length > 0) {
+          readAdditionalFiles(0, formData);
+        } else {
+          submitForm(formData);
+        }
+      };
+      reader.readAsDataURL(file);
+      
+      function readAdditionalFiles(index, formData) {
+        if (index >= additionalFiles.length) {
+          submitForm(formData);
+          return;
+        }
+        
+        var file = additionalFiles[index];
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          if (!formData.additionalFiles) {
+            formData.additionalFiles = [];
+          }
+          formData.additionalFiles.push({
+            bytes: e.target.result.split(',')[1],
+            mimeType: file.type || 'application/pdf',
+            name: file.name
+          });
+          readAdditionalFiles(index + 1, formData);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+    
+    async function submitForm(formData) {
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('submitBtn').disabled = true;
+      document.getElementById('message').style.display = 'none';
+      
+      try {
+        var result;
+        if (editId) {
+          result = await apiCall('updateEvidence', {
+            evidenceId: editId,
+            data: formData
+          });
+        } else {
+          result = await apiCall('saveEvidence', {data: formData});
+        }
+        
+        if (result.success) {
+          if (editId) {
+            showMessage('อัปเดตหลักฐานสำเร็จ!', 'success');
+            setTimeout(function() {
+              window.location.href = 'view.html?id=' + editId;
+            }, 1500);
+          } else {
+            showMessage('บันทึกหลักฐานสำเร็จ!', 'success');
+            setTimeout(function() {
+              document.getElementById('uploadForm').reset();
+              document.getElementById('date').valueAsDate = new Date();
+              document.getElementById('academic_year').value = calculateAcademicYear(document.getElementById('date').value);
+              document.getElementById('fileName').textContent = 'ยังไม่ได้เลือกไฟล์';
+              document.getElementById('fileList').innerHTML = 'ยังไม่ได้เลือกไฟล์';
+              additionalFiles = [];
+              document.getElementById('summaryBox').style.display = 'none';
+              document.getElementById('message').style.display = 'none';
+            }, 2000);
+          }
+        } else {
+          showMessage('เกิดข้อผิดพลาด: ' + result.message, 'error');
+        }
+      } catch(error) {
+        showMessage('เกิดข้อผิดพลาด: ' + handleError(error), 'error');
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('submitBtn').disabled = false;
+      }
+    }
+    
+    function initPage() {
+      console.log('Initializing page...');
+      var urlParams = new URLSearchParams(window.location.search);
+      editId = urlParams.get('edit');
+      
+      if (!editId) {
+        var today = new Date();
+        var dateInput = document.getElementById('date');
+        var yearInput = document.getElementById('academic_year');
+        if (dateInput) {
+          dateInput.valueAsDate = today;
+        }
+        if (yearInput && dateInput) {
+          yearInput.value = calculateAcademicYear(dateInput.value);
+        }
+      }
+      
+      // Ensure apiCall is available before loading evidence types
+      if (typeof apiCall === 'function') {
+        loadEvidenceTypes(editId);
+      } else {
+        console.error('apiCall not available, retrying...');
+        setTimeout(function() {
+          if (typeof apiCall === 'function') {
+            loadEvidenceTypes(editId);
+          } else {
+            console.error('apiCall still not available');
+            showMessage('ไม่สามารถโหลดประเภทหลักฐานได้ กรุณารีเฟรชหน้าเว็บ', 'error');
+          }
+        }, 500);
+      }
+    }
+    
+    // Don't call initPage here - it will be called after common.html loads
+    // The initPage is now called from the common.html loading callback
+    
+    function showMessage(text, type) {
+      var messageDiv = document.getElementById('message');
+      messageDiv.textContent = text;
+      messageDiv.className = 'message ' + type;
+      messageDiv.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

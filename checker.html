@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ตรวจสอบความครบถ้วน - TEAS-DB (Teacher Evidence & Achievement System)</title>
+  <script>
+    window.API_BASE_URL = 'https://script.google.com/macros/s/AKfycbwfKynl5gMWD1CCecER2er5EZGOnRTkhjHuiBb5yFTAyUtC2mKUepb1c93HcwLZqfcx/exec';
+    window.currentPage = 'checker';
+  </script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    button, .nav-btn, .btn { cursor: pointer; }
+    body {
+      font-family: 'Sarabun', 'Kanit', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+    .nav {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 20px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      border-bottom: 3px solid #667eea;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .nav-btn {
+      padding: 12px 20px;
+      background: white;
+      border: 2px solid #667eea;
+      color: #667eea;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.95em;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .nav-btn:hover {
+      color: white;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .nav-btn.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .content { padding: 40px; }
+    .award-selector { margin-bottom: 30px; }
+    .award-selector select {
+      width: 100%;
+      padding: 16px 20px;
+      border: 2px solid #667eea;
+      border-radius: 12px;
+      font-size: 1.2em;
+      font-weight: 600;
+      color: #667eea;
+      background: white;
+      cursor: pointer;
+    }
+    .status-card {
+      padding: 30px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      text-align: center;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    .status-card.missing {
+      background: linear-gradient(135deg, #fee 0%, #fdd 100%);
+      border-left: 5px solid #dc3545;
+      color: #721c24;
+    }
+    .status-card.minimum_pass {
+      background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
+      border-left: 5px solid #ffc107;
+      color: #856404;
+    }
+    .status-card.competitive {
+      background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+      border-left: 5px solid #28a745;
+      color: #155724;
+    }
+    .status-card h2 { font-size: 2em; margin-bottom: 10px; }
+    .status-card .icon { font-size: 3em; margin-bottom: 15px; }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+    .stat-box {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .stat-box .number {
+      font-size: 2.5em;
+      font-weight: bold;
+      color: #667eea;
+    }
+    .category-item {
+      background: white;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .category-item.missing {
+      border-color: #dc3545;
+      background: linear-gradient(135deg, #fee 0%, #fdd 100%);
+    }
+    .category-item.has-evidence {
+      border-color: #28a745;
+      background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    }
+    .missing-list {
+      margin-top: 20px;
+      padding: 20px;
+      background: #fff3cd;
+      border-radius: 8px;
+      border-left: 4px solid #ffc107;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>✅ ตรวจสอบความครบถ้วน</h1>
+    </div>
+    <div id="nav-container"></div>
+    <div class="content">
+      <div class="award-selector">
+        <select id="awardSelect">
+          <option value="">-- เลือกรางวัล/การประเมิน --</option>
+          <option value="SAR">📘 SAR (รายงานการประเมินตนเอง)</option>
+          <option value="KS4">🎓 วิทยฐานะ คศ.4 (PA)</option>
+          <option value="OBEC">🏆 OBEC Awards</option>
+          <option value="KHURUSAPHA">🏛 รางวัลคุรุสภา</option>
+          <option value="PHET_MATHAYOM">💎 เพชรมัธยมพะเยา</option>
+          <option value="NEXT_GEN">🌱 Next Generation Teacher</option>
+        </select>
+      </div>
+      
+      <div id="loading" style="display: none;">กำลังตรวจสอบ...</div>
+      <div id="error" style="display: none;"></div>
+      
+      <div id="results" style="display: none;">
+        <div id="statusCard" class="status-card">
+          <div class="icon" id="statusIcon">❓</div>
+          <h2 id="statusTitle">สถานะ</h2>
+          <p id="statusMessage">กำลังตรวจสอบ...</p>
+        </div>
+        
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="number" id="totalCount">0</div>
+            <div class="label">หลักฐานทั้งหมด</div>
+          </div>
+          <div class="stat-box">
+            <div class="number" id="minimumRequired">0</div>
+            <div class="label">ขั้นต่ำที่ต้องมี</div>
+          </div>
+          <div class="stat-box">
+            <div class="number" id="competitiveRequired">0</div>
+            <div class="label">เพื่อความได้เปรียบ</div>
+          </div>
+        </div>
+        
+        <div class="category-list">
+          <h3 style="margin-bottom: 15px; color: #333;">📊 หลักฐานตามประเภท</h3>
+          <div id="categoryList"></div>
+        </div>
+        
+        <div id="missingSection" class="missing-list" style="display: none;">
+          <h3>⚠️ ประเภทหลักฐานที่ยังขาด</h3>
+          <ul id="missingList"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    var API_BASE_URL = window.API_BASE_URL;
+    
+    // Load navigation and common functions from common.html
+    (function() {
+      fetch('common.html')
+        .then(response => response.text())
+        .then(html => {
+          var parser = new DOMParser();
+          var doc = parser.parseFromString(html, 'text/html');
+          
+          // Extract and execute scripts from common.html
+          var scripts = doc.querySelectorAll('script');
+          scripts.forEach(function(script) {
+            var newScript = document.createElement('script');
+            newScript.textContent = script.textContent;
+            document.head.appendChild(newScript);
+          });
+          
+          // Load navigation
+          var nav = doc.querySelector('.nav');
+          if (nav) {
+            document.getElementById('nav-container').innerHTML = nav.outerHTML;
+            setTimeout(function() {
+              if (typeof setActiveMenu === 'function') {
+                setActiveMenu();
+              }
+            }, 100);
+          }
+        })
+        .catch(function(error) {
+          console.error('Error loading common.html:', error);
+        });
+    })();
+    
+    document.getElementById('awardSelect').addEventListener('change', function() {
+      var awardCode = this.value;
+      if (!awardCode) {
+        document.getElementById('results').style.display = 'none';
+        return;
+      }
+      checkRequirements(awardCode);
+    });
+    
+    async function checkRequirements(awardCode) {
+      if (!awardCode) {
+        document.getElementById('results').style.display = 'none';
+        return;
+      }
+      
+      showLoading('loading');
+      document.getElementById('results').style.display = 'none';
+      hideError();
+      
+      try {
+        var result = await apiCall('checkRequirements', {awardCode: awardCode});
+        
+        if (!result.success) {
+          showError(result.message || 'เกิดข้อผิดพลาด');
+          return;
+        }
+        
+        displayResults(result);
+      } catch(error) {
+        showError('ไม่สามารถตรวจสอบได้: ' + handleError(error, 'checkRequirements'));
+      } finally {
+        hideLoading('loading');
+      }
+    }
+    
+    function displayResults(result) {
+      var statusCard = document.getElementById('statusCard');
+      var statusIcon = document.getElementById('statusIcon');
+      var statusTitle = document.getElementById('statusTitle');
+      var statusMessage = document.getElementById('statusMessage');
+      
+      statusCard.className = 'status-card ' + result.status;
+      
+      if (result.status === 'missing') {
+        statusIcon.textContent = '❌';
+        statusTitle.textContent = 'ยังไม่ครบ';
+        statusMessage.textContent = 'คุณยังมีหลักฐานไม่ครบตามเกณฑ์ขั้นต่ำ';
+      } else if (result.status === 'minimum_pass') {
+        statusIcon.textContent = '⚠️';
+        statusTitle.textContent = 'ผ่านเกณฑ์ขั้นต่ำ';
+        statusMessage.textContent = 'คุณมีหลักฐานครบตามเกณฑ์ขั้นต่ำแล้ว แต่ควรเพิ่มเพื่อความได้เปรียบ';
+      } else if (result.status === 'competitive') {
+        statusIcon.textContent = '✅';
+        statusTitle.textContent = 'พร้อมแข่งขัน';
+        statusMessage.textContent = 'ยอดเยี่ยม! คุณมีหลักฐานครบถ้วนและพร้อมส่งเข้าประกวด';
+      }
+      
+      document.getElementById('totalCount').textContent = result.total_count || 0;
+      document.getElementById('minimumRequired').textContent = result.minimum_required || 0;
+      document.getElementById('competitiveRequired').textContent = result.competitive_required || 0;
+      
+      var categoryList = document.getElementById('categoryList');
+      categoryList.innerHTML = '';
+      
+      if (result.category_counts) {
+        Object.keys(result.category_counts).forEach(function(category) {
+          var count = result.category_counts[category];
+          var item = document.createElement('div');
+          item.className = 'category-item ' + (count > 0 ? 'has-evidence' : 'missing');
+          item.innerHTML = '<div class="category-name">' + category + '</div><div class="category-count">' + count + ' ชิ้น</div>';
+          categoryList.appendChild(item);
+        });
+      }
+      
+      var missingSection = document.getElementById('missingSection');
+      var missingList = document.getElementById('missingList');
+      
+      if (result.missing_categories && result.missing_categories.length > 0) {
+        missingList.innerHTML = '';
+        result.missing_categories.forEach(function(category) {
+          var li = document.createElement('li');
+          li.textContent = category;
+          missingList.appendChild(li);
+        });
+        missingSection.style.display = 'block';
+      } else {
+        missingSection.style.display = 'none';
+      }
+      
+      document.getElementById('results').style.display = 'block';
+    }
+    
+    function showError(message) {
+      var errorDiv = document.getElementById('error');
+      if (errorDiv) {
+        errorDiv.innerHTML = '<div style="background: #fee; border: 2px solid #fcc; color: #c33; padding: 20px; border-radius: 10px; text-align: center;"><strong>⚠️ เกิดข้อผิดพลาด</strong><br>' + message + '</div>';
+        errorDiv.style.display = 'block';
+      }
+    }
+    
+    function hideError() {
+      var errorDiv = document.getElementById('error');
+      if (errorDiv) {
+        errorDiv.style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html>
