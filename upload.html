@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>อัปโหลดหลักฐาน - TEAS-DB</title>
+  <script>
+    window.API_BASE_URL = 'https://script.google.com/macros/s/AKfycbyPG_sgIAzE_KHrn50qsYFu0tHGRXPSJuquHSb7fpUFqPHpdIWjXYMb8NqdMhaDU7W1/exec';
+    window.currentPage = 'upload';
+    var editId = null;
+    var additionalFiles = [];
+  </script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    button, .nav-btn, .btn { cursor: pointer; }
+    body {
+      font-family: 'Sarabun', 'Kanit', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+    .content { padding: 40px; }
+    .form-group { margin-bottom: 25px; }
+    .form-group label {
+      display: block;
+      margin-bottom: 10px;
+      color: #333;
+      font-weight: 600;
+      font-size: 1.1em;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid #e9ecef;
+      border-radius: 10px;
+      font-size: 1em;
+      font-family: inherit;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+    .checkbox-group {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 10px;
+    }
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .file-upload {
+      border: 2px dashed #667eea;
+      border-radius: 8px;
+      padding: 30px;
+      text-align: center;
+      background: #f8f9ff;
+      cursor: pointer;
+    }
+    .file-upload input[type="file"] { display: none; }
+    .file-list {
+      margin-top: 10px;
+      text-align: left;
+      padding: 10px;
+      background: white;
+      border-radius: 5px;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+    .file-item {
+      padding: 5px 10px;
+      margin: 5px 0;
+      background: #f8f9ff;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .file-item-remove {
+      color: #dc3545;
+      cursor: pointer;
+      font-weight: bold;
+      padding: 0 10px;
+    }
+    .section-title {
+      font-size: 1.3em;
+      color: #667eea;
+      margin: 30px 0 15px 0;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e9ecef;
+    }
+    .btn {
+      padding: 16px 32px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1em;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .message {
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      display: none;
+    }
+    .message.success { background: #d4edda; color: #155724; }
+    .message.error { background: #f8d7da; color: #721c24; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📤 อัปโหลดหลักฐาน</h1>
+    </div>
+    <div id="nav-container"></div>
+    <div class="content">
+      <div id="message" class="message"></div>
+      <div id="loading" style="display: none;">กำลังบันทึก...</div>
+      
+      <form id="uploadForm">
+        <div class="form-group">
+          <label>📋 ชื่อหลักฐาน *</label>
+          <input type="text" id="title" name="title" required placeholder="เช่น แผนการจัดการเรียนรู้ หน่วยที่ 1">
+        </div>
+        <div class="form-group">
+          <label>📅 วันที่ *</label>
+          <input type="date" id="date" name="date" required>
+        </div>
+        <div class="form-group">
+          <label>📁 ประเภทหลักฐาน *</label>
+          <select id="evidence_type" name="evidence_type" required>
+            <option value="">-- เลือกประเภท --</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>📄 ประเภทไฟล์</label>
+          <select id="file_type" name="file_type">
+            <option value="pdf">PDF</option>
+            <option value="image">รูปภาพ</option>
+            <option value="document">เอกสาร Word</option>
+            <option value="spreadsheet">สเปรดชีต</option>
+            <option value="other">อื่นๆ</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>📝 คำอธิบาย</label>
+          <textarea id="description" name="description" placeholder="อธิบายรายละเอียดของหลักฐานนี้" style="width: 100%; padding: 14px 16px; border: 2px solid #e9ecef; border-radius: 10px; font-size: 1em; font-family: inherit; min-height: 100px; resize: vertical;"></textarea>
+        </div>
+        <div class="form-group">
+          <label>📎 แนบไฟล์หลัก *</label>
+          <div class="file-upload" onclick="document.getElementById('fileInput').click()">
+            <div>📎 คลิกเพื่อเลือกไฟล์หลัก (เช่น คำสั่ง, เกียรติบัตร)</div>
+            <div id="fileName">ยังไม่ได้เลือกไฟล์</div>
+            <input type="file" id="fileInput" name="file">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>📎 แนบไฟล์เพิ่มเติม (รูปภาพ, เอกสารประกอบ)</label>
+          <div class="file-upload" onclick="document.getElementById('additionalFilesInput').click()">
+            <div>📎 คลิกเพื่อเลือกไฟล์เพิ่มเติม (กด Ctrl หรือ Cmd เพื่อเลือกหลายไฟล์)</div>
+            <div class="file-list" id="fileList">ยังไม่ได้เลือกไฟล์</div>
+            <input type="file" id="additionalFilesInput" name="additionalFiles" multiple>
+          </div>
+        </div>
+        <h3 class="section-title" style="font-size: 1.3em; color: #667eea; margin: 30px 0 15px 0; padding-bottom: 10px; border-bottom: 2px solid #e9ecef;">🎯 ใช้สำหรับรางวัล/การประเมิน</h3>
+        <div class="checkbox-group">
+          <div class="checkbox-item">
+            <input type="checkbox" id="sar" name="sar" value="true">
+            <label for="sar" style="margin: 0; font-weight: normal;">📘 SAR</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="pa_ks4" name="pa_ks4" value="true">
+            <label for="pa_ks4" style="margin: 0; font-weight: normal;">🎓 วิทยฐานะ คศ.4</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="phet_mathayom" name="phet_mathayom" value="true">
+            <label for="phet_mathayom" style="margin: 0; font-weight: normal;">💎 เพชรมัธยมพะเยา</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="khurusapha" name="khurusapha" value="true">
+            <label for="khurusapha" style="margin: 0; font-weight: normal;">🏛 รางวัลคุรุสภา</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="obec" name="obec" value="true">
+            <label for="obec" style="margin: 0; font-weight: normal;">🏆 OBEC Awards</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="next_gen" name="next_gen" value="true">
+            <label for="next_gen" style="margin: 0; font-weight: normal;">🌱 Next Gen Teacher</label>
+          </div>
+        </div>
+        <h3 class="section-title" style="font-size: 1.3em; color: #667eea; margin: 30px 0 15px 0; padding-bottom: 10px; border-bottom: 2px solid #e9ecef;">💎 เพชรมัธยมพะเยา (เฉพาะ)</h3>
+        <div class="checkbox-group">
+          <div class="checkbox-item">
+            <input type="checkbox" id="krong_ton" name="krong_ton" value="true">
+            <label for="krong_ton" style="margin: 0; font-weight: normal;">ครองตน</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="krong_kon" name="krong_kon" value="true">
+            <label for="krong_kon" style="margin: 0; font-weight: normal;">ครองคน</label>
+          </div>
+          <div class="checkbox-item">
+            <input type="checkbox" id="krong_ngan" name="krong_ngan" value="true">
+            <label for="krong_ngan" style="margin: 0; font-weight: normal;">ครองงาน</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>📊 ระดับผลกระทบ</label>
+          <select id="impact_level" name="impact_level">
+            <option value="school">โรงเรียน</option>
+            <option value="district">เขตพื้นที่</option>
+            <option value="province">จังหวัด</option>
+            <option value="national">ระดับชาติ</option>
+            <option value="international">ระดับนานาชาติ</option>
+          </select>
+        </div>
+        <button type="submit" class="btn" id="submitBtn">💾 บันทึกหลักฐาน</button>
+      </form>
+    </div>
+  </div>
+  
+  <script>
+    // Load navigation and common functions from common.html
+    (function() {
+      fetch('common.html')
+        .then(response => response.text())
+        .then(html => {
+          var parser = new DOMParser();
+          var doc = parser.parseFromString(html, 'text/html');
+          
+          // Extract and execute scripts from common.html
+          var scripts = doc.querySelectorAll('script');
+          scripts.forEach(function(script) {
+            var newScript = document.createElement('script');
+            newScript.textContent = script.textContent;
+            document.head.appendChild(newScript);
+          });
+          
+          // Load navigation
+          var nav = doc.querySelector('.nav');
+          if (nav) {
+            document.getElementById('nav-container').innerHTML = nav.outerHTML;
+            setTimeout(function() {
+              if (typeof setActiveMenu === 'function') {
+                setActiveMenu();
+              }
+            }, 100);
+          }
+        })
+        .catch(function(error) {
+          console.error('Error loading common.html:', error);
+        });
+    })();
+    
+    var API_BASE_URL = window.API_BASE_URL;
+    
+    var additionalFiles = [];
+    
+    async function loadEvidenceTypes(editId) {
+      try {
+        var types = await apiCall('getEvidenceTypes', {});
+        var select = document.getElementById('evidence_type');
+        types.forEach(function(type) {
+          var option = document.createElement('option');
+          option.value = type.value;
+          option.textContent = type.label;
+          select.appendChild(option);
+        });
+        
+        if (editId) {
+          loadEvidenceData(editId);
+        }
+      } catch(error) {
+        console.error('Error loading types:', error);
+      }
+    }
+    
+    async function loadEvidenceData(editId) {
+      try {
+        var result = await apiCall('getEvidenceById', {evidenceId: editId});
+        
+        if (result.success && result.evidence) {
+          var ev = result.evidence;
+          document.getElementById('title').value = ev.title || '';
+          document.getElementById('date').value = ev.date || '';
+          document.getElementById('evidence_type').value = ev.evidence_type || '';
+          document.getElementById('file_type').value = ev.file_type || '';
+          document.getElementById('description').value = ev.description || '';
+          document.getElementById('sar').checked = ev.sar === true || ev.sar === 'TRUE';
+          document.getElementById('pa_ks4').checked = ev.pa_ks4 === true || ev.pa_ks4 === 'TRUE';
+          document.getElementById('phet_mathayom').checked = ev.phet_mathayom === true || ev.phet_mathayom === 'TRUE';
+          document.getElementById('khurusapha').checked = ev.khurusapha === true || ev.khurusapha === 'TRUE';
+          document.getElementById('obec').checked = ev.obec === true || ev.obec === 'TRUE';
+          document.getElementById('next_gen').checked = ev.next_gen === true || ev.next_gen === 'TRUE';
+          document.getElementById('krong_ton').checked = ev.krong_ton === true || ev.krong_ton === 'TRUE';
+          document.getElementById('krong_kon').checked = ev.krong_kon === true || ev.krong_kon === 'TRUE';
+          document.getElementById('krong_ngan').checked = ev.krong_ngan === true || ev.krong_ngan === 'TRUE';
+          document.getElementById('impact_level').value = ev.impact_level || '';
+          document.getElementById('submitBtn').textContent = '💾 อัปเดตหลักฐาน';
+          document.querySelector('.header h1').textContent = '✏️ แก้ไขหลักฐาน';
+        }
+      } catch(error) {
+        console.error('Error loading evidence:', error);
+      }
+    }
+    
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+      var file = e.target.files[0];
+      if (file) {
+        document.getElementById('fileName').textContent = file.name;
+      } else {
+        document.getElementById('fileName').textContent = 'ยังไม่ได้เลือกไฟล์';
+      }
+    });
+    
+    document.getElementById('additionalFilesInput').addEventListener('change', function(e) {
+      var files = Array.from(e.target.files);
+      additionalFiles = files;
+      updateFileList();
+    });
+    
+    function updateFileList() {
+      var fileListDiv = document.getElementById('fileList');
+      if (additionalFiles.length === 0) {
+        fileListDiv.innerHTML = 'ยังไม่ได้เลือกไฟล์';
+        return;
+      }
+      
+      fileListDiv.innerHTML = '';
+      additionalFiles.forEach(function(file, index) {
+        var fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        fileItem.innerHTML = '<span>' + file.name + ' (' + formatFileSize(file.size) + ')</span>' +
+                           '<span class="file-item-remove" onclick="removeFile(' + index + ')">✕</span>';
+        fileListDiv.appendChild(fileItem);
+      });
+    }
+    
+    function removeFile(index) {
+      additionalFiles.splice(index, 1);
+      updateFileList();
+      var dt = new DataTransfer();
+      additionalFiles.forEach(function(file) {
+        dt.items.add(file);
+      });
+      document.getElementById('additionalFilesInput').files = dt.files;
+    }
+    
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      var k = 1024;
+      var sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      var i = Math.floor(Math.log(bytes) / Math.log(k));
+      return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    }
+    
+    document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      var formData = {
+        title: document.getElementById('title').value,
+        date: document.getElementById('date').value,
+        evidence_type: document.getElementById('evidence_type').value,
+        file_type: document.getElementById('file_type').value,
+        description: document.getElementById('description').value,
+        sar: document.getElementById('sar').checked,
+        pa_ks4: document.getElementById('pa_ks4').checked,
+        phet_mathayom: document.getElementById('phet_mathayom').checked,
+        khurusapha: document.getElementById('khurusapha').checked,
+        obec: document.getElementById('obec').checked,
+        next_gen: document.getElementById('next_gen').checked,
+        krong_ton: document.getElementById('krong_ton').checked,
+        krong_kon: document.getElementById('krong_kon').checked,
+        krong_ngan: document.getElementById('krong_ngan').checked,
+        impact_level: document.getElementById('impact_level').value,
+        status: 'draft'
+      };
+      
+      if (!formData.title || !formData.date || !formData.evidence_type) {
+        showMessage('กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน', 'error');
+        return;
+      }
+      
+      var fileInput = document.getElementById('fileInput');
+      var file = fileInput.files[0];
+      
+      if (file) {
+        var reader = new FileReader();
+        reader.onload = async function(e) {
+          var base64Data = e.target.result.split(',')[1];
+          formData.fileBlob = {
+            bytes: base64Data,
+            mimeType: file.type || 'application/pdf',
+            name: file.name
+          };
+          
+          if (additionalFiles.length > 0) {
+            readAdditionalFiles(0, formData);
+          } else {
+            submitForm(formData);
+          }
+        };
+        reader.readAsDataURL(file);
+      } else {
+        if (additionalFiles.length > 0) {
+          readAdditionalFiles(0, formData);
+        } else {
+          submitForm(formData);
+        }
+      }
+      
+      function readAdditionalFiles(index, formData) {
+        if (index >= additionalFiles.length) {
+          submitForm(formData);
+          return;
+        }
+        
+        var file = additionalFiles[index];
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          if (!formData.additionalFiles) {
+            formData.additionalFiles = [];
+          }
+          formData.additionalFiles.push({
+            bytes: e.target.result.split(',')[1],
+            mimeType: file.type || 'application/pdf',
+            name: file.name
+          });
+          readAdditionalFiles(index + 1, formData);
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+    
+    async function submitForm(formData) {
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('submitBtn').disabled = true;
+      document.getElementById('message').style.display = 'none';
+      
+      try {
+        var result;
+        if (editId) {
+          result = await apiCall('updateEvidence', {
+            evidenceId: editId,
+            data: formData
+          });
+        } else {
+          result = await apiCall('saveEvidence', {data: formData});
+        }
+        
+        if (result.success) {
+          if (editId) {
+            showMessage('อัปเดตหลักฐานสำเร็จ!', 'success');
+            setTimeout(function() {
+              window.location.href = 'view.html?id=' + editId;
+            }, 1500);
+          } else {
+            showMessage('บันทึกหลักฐานสำเร็จ!', 'success');
+            setTimeout(function() {
+              document.getElementById('uploadForm').reset();
+              document.getElementById('date').valueAsDate = new Date();
+              document.getElementById('fileName').textContent = 'ยังไม่ได้เลือกไฟล์';
+              document.getElementById('fileList').innerHTML = 'ยังไม่ได้เลือกไฟล์';
+              additionalFiles = [];
+              document.getElementById('message').style.display = 'none';
+            }, 2000);
+          }
+        } else {
+          showMessage('เกิดข้อผิดพลาด: ' + result.message, 'error');
+        }
+      } catch(error) {
+        showMessage('เกิดข้อผิดพลาด: ' + handleError(error), 'error');
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('submitBtn').disabled = false;
+      }
+    }
+    
+    function initPage() {
+      var urlParams = new URLSearchParams(window.location.search);
+      editId = urlParams.get('edit');
+      
+      if (!editId) {
+        document.getElementById('date').valueAsDate = new Date();
+      }
+      
+      loadEvidenceTypes(editId);
+    }
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPage);
+    } else {
+      initPage();
+    }
+    
+    function showMessage(text, type) {
+      var messageDiv = document.getElementById('message');
+      messageDiv.textContent = text;
+      messageDiv.className = 'message ' + type;
+      messageDiv.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

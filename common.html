@@ -1,0 +1,168 @@
+<!-- Common Navigation and Functions -->
+<script>
+  // API Base URL - will be set by each page
+  var API_BASE_URL = window.API_BASE_URL || '';
+  
+  /**
+   * Set active menu based on current page
+   */
+  function setActiveMenu() {
+    try {
+      var currentPage = window.currentPage || 'index';
+      var navButtons = document.querySelectorAll('.nav-btn');
+      navButtons.forEach(function(btn) {
+        btn.classList.remove('active');
+      });
+      
+      var pageMap = {
+        'index': 'index',
+        'upload': 'upload',
+        'search': 'search',
+        'checker': 'checker',
+        'sar': 'sar',
+        'download': 'download',
+        'about': 'about',
+        'view': 'index'
+      };
+      
+      var menuPage = pageMap[currentPage] || currentPage;
+      var activeButton = document.querySelector('.nav-btn[data-page="' + menuPage + '"]');
+      if (activeButton) {
+        activeButton.classList.add('active');
+      }
+    } catch (error) {
+      console.error('Error setting active menu:', error);
+    }
+  }
+  
+  /**
+   * Initialize active menu when DOM is ready
+   */
+  function initMenu() {
+    try {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setActiveMenu);
+      } else {
+        setActiveMenu();
+      }
+    } catch (error) {
+      console.error('Error initializing menu:', error);
+    }
+  }
+  
+  initMenu();
+  
+  /**
+   * Standard Error Handler
+   */
+  function handleError(error, context) {
+    try {
+      console.error('Error in ' + (context || 'unknown') + ':', error);
+      var message = 'เกิดข้อผิดพลาด';
+      
+      if (error && error.message) {
+        message = error.message;
+      } else if (typeof error === 'string') {
+        message = error;
+      }
+      
+      return message;
+    } catch (e) {
+      return 'เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ';
+    }
+  }
+  
+  /**
+   * Show Loading State
+   */
+  function showLoading(elementId) {
+    try {
+      var element = document.getElementById(elementId);
+      if (element) {
+        element.style.display = 'block';
+        element.innerHTML = '<div style="text-align: center; padding: 40px;"><div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite;"></div><p style="margin-top: 20px; color: #666;">กำลังโหลด...</p></div>';
+      }
+    } catch (error) {
+      console.error('Error showing loading:', error);
+    }
+  }
+  
+  /**
+   * Hide Loading State
+   */
+  function hideLoading(elementId) {
+    try {
+      var element = document.getElementById(elementId);
+      if (element) {
+        element.style.display = 'none';
+      }
+    } catch (error) {
+      console.error('Error hiding loading:', error);
+    }
+  }
+  
+  /**
+   * API Call Helper
+   */
+  async function apiCall(action, data) {
+    try {
+      // Use window.API_BASE_URL (set by each page) or fallback to API_BASE_URL from common.html
+      var baseUrl = window.API_BASE_URL || API_BASE_URL || '';
+      
+      if (!baseUrl) {
+        throw new Error('API_BASE_URL is not configured. Please set window.API_BASE_URL in the HTML file.');
+      }
+      
+      var response = await fetch(baseUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: action,
+          ...data
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('HTTP error! status: ' + response.status);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('API call error:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * CSS Animation for loading spinner
+   */
+  function initLoadingSpinnerStyle() {
+    try {
+      if (!document.getElementById('loading-spinner-style')) {
+        var style = document.createElement('style');
+        style.id = 'loading-spinner-style';
+        style.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+        if (document.head) {
+          document.head.appendChild(style);
+        }
+      }
+    } catch (error) {
+      console.error('Error adding loading spinner style:', error);
+    }
+  }
+  
+  initLoadingSpinnerStyle();
+</script>
+
+<!-- Navigation Menu -->
+<div class="nav">
+  <a class="nav-btn" href="index.html" data-page="index">🏠 หน้าหลัก</a>
+  <a class="nav-btn" href="upload.html" data-page="upload">📤 อัปโหลด</a>
+  <a class="nav-btn" href="search.html" data-page="search">🔍 ค้นหา</a>
+  <a class="nav-btn" href="checker.html" data-page="checker">✅ ตรวจสอบ</a>
+  <a class="nav-btn" href="sar.html" data-page="sar">📘 SAR</a>
+  <a class="nav-btn" href="download.html" data-page="download">📥 ดาวน์โหลด</a>
+  <a class="nav-btn" href="about.html" data-page="about">ℹ️ เกี่ยวกับ</a>
+</div>
